@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:async';
 import 'db_interaction.dart';
+import 'overviewpage.dart';
+import 'learnpage.dart';
+import 'biblepage.dart';
 
 void main() => runApp(MyApp());
 
@@ -23,14 +26,16 @@ class MyApp extends StatelessWidget {
 
 
 class Home extends StatefulWidget {
-  final DataBaseHelper helper;
-  Home(this.helper);
+  final helper;
   @override
-  _HomeState createState() => _HomeState();
+  Home(this.helper);
+  _HomeState createState() => _HomeState(this.helper);
 }
 
 class _HomeState extends State<Home> {
   int _selectedIndex = 0;
+  final helper;
+  _HomeState(this.helper);
 
   void _onItemTapped(int index) {
     setState(() {
@@ -40,25 +45,29 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
+    final _pages = <Widget>[
+      OverviewPage(),
+      LearnPage(),
+      BiblePage(this.helper),
+    ];
     return Scaffold(
+      body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            title: Text('Home'),
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.business),
-            title: Text('Business'),
+            title: Text('Übersicht'),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.school),
-            title: Text('School'),
+            title: Text('Lernen'),
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.book),
+            title: Text('Bibel'),
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.amber[800],
         onTap: _onItemTapped,
       ),
     );
