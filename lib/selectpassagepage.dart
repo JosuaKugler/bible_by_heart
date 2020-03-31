@@ -36,77 +36,6 @@ class _SelectPassageState extends State<SelectPassage>
     _tabController = TabController(vsync: this, length: myTabs.length);
   }
 
-  /*
-  final Map<String, String> short2long = {
-    "Gen": "Genesis",
-    "Exo": "Exodus",
-    "Lev": "Levitikus",
-    "Num": "Numeri",
-    "Deu": "Deuteronomium",
-    "Jos": "Josua",
-    "Jdg": "Richter",
-    "Rut": "Ruth",
-    "1Sa": "1. Samuel",
-    "2Sa": "2. Samuel",
-    "1Ki": "1. Könige",
-    "2Ki": "2. Könige",
-    "1Ch": "1. Chronik",
-    "2Ch": "2. Chronik",
-    "Ezr": "Esra",
-    "Neh": "Nehemia",
-    "Est": "Esther",
-    "Job": "Hiob",
-    "Psa": "Psalmen",
-    "Pro": "Sprüche",
-    "Ecc": "Prediger",
-    "Sol": "Hoheslied",
-    "Isa": "Jesaja",
-    "Jer": "Jeremia",
-    "Lam": "Klagelieder",
-    "Eze": "Hesekiel",
-    "Dan": "Daniel",
-    "Hos": "Hosea",
-    "Joe": "Joel",
-    "Amo": "Amos",
-    "Abd": "Obadja",
-    "Jon": "Jona",
-    "Mic": "Micha",
-    "Nah": "Nahum",
-    "Hab": "Habakuk",
-    "Zep": "Zefanja",
-    "Hag": "Haggai",
-    "Zec": "Sacharja",
-    "Mal": "Maleachi",
-    "Mat": "Matthäus",
-    "Mar": "Markus",
-    "Luk": "Lukas",
-    "Joh": "Johannes",
-    "Act": "Apostelgeschichte",
-    "Rom": "Römer",
-    "1Co": "1. Korinther",
-    "2Co": "2. Korinther",
-    "Gal": "Galater",
-    "Eph": "Epheser",
-    "Phi": "Philipper",
-    "Col": "Kolosser",
-    "1Th": "1. Thessalonicher",
-    "2Th": "2. Thessalonicher",
-    "1Ti": "1. Timotheus",
-    "2Ti": "2. Timotheus",
-    "Tit": "Titus",
-    "Phm": "Philemon",
-    "Heb": "Hebräer",
-    "Jam": "Jakobus",
-    "1Pe": "1. Petrus",
-    "2Pe": "2. Petrus",
-    "1Jo": "1. Johannes",
-    "2Jo": "2. Johannes",
-    "3Jo": "3. Johannes",
-    "Jud": "Judas",
-    "Rev": "Offenbarung",
-  };
-   */
-
   final Map<String, int> chapterNumbers = {
     'Gen': 50,
     'Exo': 40,
@@ -188,7 +117,7 @@ class _SelectPassageState extends State<SelectPassage>
           setState(() {
             this.book = book;
           });
-          _tabController.animateTo(1);
+          _tabController.animateTo(1, duration: Duration(milliseconds: 150));
         },
       );
     }).toList();
@@ -222,6 +151,7 @@ class _SelectPassageState extends State<SelectPassage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        title: Text("Bibelstelle wählen"),
         bottom: TabBar(
           controller: _tabController,
           tabs: myTabs,

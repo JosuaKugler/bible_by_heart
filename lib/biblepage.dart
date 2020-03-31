@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'selectpassagepage.dart';
+import 'settingspage.dart';
 
 class BiblePage extends StatefulWidget {
   final Map<String, String> short2long = {
@@ -87,6 +88,7 @@ class _BiblePageState extends State<BiblePage> {
   Passage displayPassage = Passage("Gen", 1, 1);
   double offset = 0;
   Future<List<Verse>> _verseList;
+  double fontSize = 18.0;
 
   @override
   void initState() {
@@ -100,10 +102,18 @@ class _BiblePageState extends State<BiblePage> {
     String book = preferences.getString("book") ?? "Gen";
     int chapter = preferences.getInt("chapter") ?? 1;
     offset = preferences.getDouble("offset") ?? 0;
+    fontSize = preferences.getDouble("fontSize") ?? 18;
     scrollController = new ScrollController(initialScrollOffset: offset);
+    scrollController.jumpTo(offset);
     displayPassage = Passage(book, chapter, 1);
     //print("I have just read $displayPassage from SharedPreferences");
     return displayPassage;
+  }
+
+  void setSettings(double newFontSize) {
+    setState(() {
+      fontSize = newFontSize;
+    });
   }
 
   void setNewChapter(Passage passage) async {
@@ -169,7 +179,10 @@ class _BiblePageState extends State<BiblePage> {
 
   List<Widget> versesToWidget(List<Verse> verseList) {
     List<Widget> list = List.generate(verseList.length, (i) {
-      return Text('${getVerseNumber(verseList[i].verse)}${verseList[i].text}');
+      return Text(
+          '${getVerseNumber(verseList[i].verse)}${verseList[i].text}',
+        style: TextStyle(fontSize: fontSize),
+      );
     });
     list.add(Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -216,12 +229,22 @@ class _BiblePageState extends State<BiblePage> {
                     onPressed: () {
                       Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => SelectPassage(this.helper, this.setNewChapter, this.displayPassage, widget.short2long))
+                          MaterialPageRoute(
+                              builder: (context) => SelectPassage(
+                                  this.helper, this.setNewChapter, this.displayPassage, widget.short2long
+                              )
+                          )
                       );
                     },
                   ),
                   IconButton(
                     icon: Icon(Icons.settings, color: Color.fromRGBO(255, 255, 255, 1),),
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => SettingsPage(this.setSettings, this.fontSize))
+                      );
+                    },
                   )
                 ],
               ),
@@ -263,7 +286,7 @@ class _BiblePageState extends State<BiblePage> {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     preferences.setString("book", displayPassage.book);
     preferences.setInt("chapter", displayPassage.chapter);
-    //print("I have just saved $displayPassage to SharedPreferences because of disposal");
     preferences.setDouble("offset", offset);
+    preferences.setDouble("fontSize", fontSize);
   }
 }
