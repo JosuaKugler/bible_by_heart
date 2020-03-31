@@ -179,9 +179,22 @@ class _BiblePageState extends State<BiblePage> {
 
   List<Widget> versesToWidget(List<Verse> verseList) {
     List<Widget> list = List.generate(verseList.length, (i) {
-      return Text(
+      return new GestureDetector(
+        onTap: () {
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20.0),
+                    topRight: Radius.circular(20.0))),
+            builder: (context) => Container(),
+          );
+        },
+        child: Text(
           '${getVerseNumber(verseList[i].verse)}${verseList[i].text}',
-        style: TextStyle(fontSize: fontSize),
+          style: TextStyle(fontSize: fontSize),
+        ),
       );
     });
     list.add(Row(
@@ -220,10 +233,12 @@ class _BiblePageState extends State<BiblePage> {
                           "${widget.short2long[displayPassage.book]} ${displayPassage.chapter}",
                           style: TextStyle(
                               color: Color.fromRGBO(255, 255, 255, 1),
-                              fontSize: 20.0
-                          ),
+                              fontSize: 20.0),
                         ),
-                        Icon(Icons.arrow_drop_down, color: Color.fromRGBO(255, 255, 255, 1),)
+                        Icon(
+                          Icons.arrow_drop_down,
+                          color: Color.fromRGBO(255, 255, 255, 1),
+                        )
                       ],
                     ),
                     onPressed: () {
@@ -231,19 +246,23 @@ class _BiblePageState extends State<BiblePage> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => SelectPassage(
-                                  this.helper, this.setNewChapter, this.displayPassage, widget.short2long
-                              )
-                          )
-                      );
+                                  this.helper,
+                                  this.setNewChapter,
+                                  this.displayPassage,
+                                  widget.short2long)));
                     },
                   ),
                   IconButton(
-                    icon: Icon(Icons.settings, color: Color.fromRGBO(255, 255, 255, 1),),
+                    icon: Icon(
+                      Icons.settings,
+                      color: Color.fromRGBO(255, 255, 255, 1),
+                    ),
                     onPressed: () {
                       Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => SettingsPage(this.setSettings, this.fontSize))
-                      );
+                          MaterialPageRoute(
+                              builder: (context) => SettingsPage(
+                                  this.setSettings, this.fontSize)));
                     },
                   )
                 ],
