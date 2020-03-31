@@ -5,6 +5,74 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'selectpassagepage.dart';
 
 class BiblePage extends StatefulWidget {
+  final Map<String, String> short2long = {
+    "Gen": "Genesis",
+    "Exo": "Exodus",
+    "Lev": "Levitikus",
+    "Num": "Numeri",
+    "Deu": "Deuteronomium",
+    "Jos": "Josua",
+    "Jdg": "Richter",
+    "Rut": "Ruth",
+    "1Sa": "1. Samuel",
+    "2Sa": "2. Samuel",
+    "1Ki": "1. Könige",
+    "2Ki": "2. Könige",
+    "1Ch": "1. Chronik",
+    "2Ch": "2. Chronik",
+    "Ezr": "Esra",
+    "Neh": "Nehemia",
+    "Est": "Esther",
+    "Job": "Hiob",
+    "Psa": "Psalmen",
+    "Pro": "Sprüche",
+    "Ecc": "Prediger",
+    "Sol": "Hoheslied",
+    "Isa": "Jesaja",
+    "Jer": "Jeremia",
+    "Lam": "Klagelieder",
+    "Eze": "Hesekiel",
+    "Dan": "Daniel",
+    "Hos": "Hosea",
+    "Joe": "Joel",
+    "Amo": "Amos",
+    "Abd": "Obadja",
+    "Jon": "Jona",
+    "Mic": "Micha",
+    "Nah": "Nahum",
+    "Hab": "Habakuk",
+    "Zep": "Zefanja",
+    "Hag": "Haggai",
+    "Zec": "Sacharja",
+    "Mal": "Maleachi",
+    "Mat": "Matthäus",
+    "Mar": "Markus",
+    "Luk": "Lukas",
+    "Joh": "Johannes",
+    "Act": "Apostelgeschichte",
+    "Rom": "Römer",
+    "1Co": "1. Korinther",
+    "2Co": "2. Korinther",
+    "Gal": "Galater",
+    "Eph": "Epheser",
+    "Phi": "Philipper",
+    "Col": "Kolosser",
+    "1Th": "1. Thessalonicher",
+    "2Th": "2. Thessalonicher",
+    "1Ti": "1. Timotheus",
+    "2Ti": "2. Timotheus",
+    "Tit": "Titus",
+    "Phm": "Philemon",
+    "Heb": "Hebräer",
+    "Jam": "Jakobus",
+    "1Pe": "1. Petrus",
+    "2Pe": "2. Petrus",
+    "1Jo": "1. Johannes",
+    "2Jo": "2. Johannes",
+    "3Jo": "3. Johannes",
+    "Jud": "Judas",
+    "Rev": "Offenbarung",
+  };
   final helper;
   BiblePage(this.helper);
 
@@ -136,7 +204,7 @@ class _BiblePageState extends State<BiblePage> {
                     child: Row(
                       children: <Widget>[
                         Text(
-                          "${displayPassage.book} ${displayPassage.chapter}",
+                          "${widget.short2long[displayPassage.book]} ${displayPassage.chapter}",
                           style: TextStyle(
                               color: Color.fromRGBO(255, 255, 255, 1),
                               fontSize: 20.0
@@ -148,7 +216,7 @@ class _BiblePageState extends State<BiblePage> {
                     onPressed: () {
                       Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => SelectPassage(this.helper, this.setNewChapter, this.displayPassage))
+                          MaterialPageRoute(builder: (context) => SelectPassage(this.helper, this.setNewChapter, this.displayPassage, widget.short2long))
                       );
                     },
                   ),

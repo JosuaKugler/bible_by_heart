@@ -7,7 +7,8 @@ class SelectPassage extends StatefulWidget {
   final DataBaseHelper helper;
   final Passage displayPassage;
   final Function setNewChapter;
-  SelectPassage(this.helper, this.setNewChapter, this.displayPassage);
+  final Map<String, String> short2long;
+  SelectPassage(this.helper, this.setNewChapter, this.displayPassage, this.short2long);
   @override
   _SelectPassageState createState() =>
       _SelectPassageState(this.helper, this.setNewChapter, this.displayPassage);
@@ -35,6 +36,7 @@ class _SelectPassageState extends State<SelectPassage>
     _tabController = TabController(vsync: this, length: myTabs.length);
   }
 
+  /*
   final Map<String, String> short2long = {
     "Gen": "Genesis",
     "Exo": "Exodus",
@@ -103,6 +105,7 @@ class _SelectPassageState extends State<SelectPassage>
     "Jud": "Judas",
     "Rev": "Offenbarung",
   };
+   */
 
   final Map<String, int> chapterNumbers = {
     'Gen': 50,
@@ -175,12 +178,12 @@ class _SelectPassageState extends State<SelectPassage>
 
   List<ListTile> generateBookList() {
     List<String> bookList = [];
-    short2long.forEach((key, value) {
+    widget.short2long.forEach((key, value) {
       bookList.add(key);
     });
     return bookList.map((String book) {
       return ListTile(
-        title: Text(short2long[book]),
+        title: Text(widget.short2long[book]),
         onTap: () {
           setState(() {
             this.book = book;
@@ -193,7 +196,7 @@ class _SelectPassageState extends State<SelectPassage>
 
   List<ListTile> generateChapterList(String book, BuildContext context) {
     int chapterNumber = chapterNumbers[book];
-    List<int> chapterList = [for(var i=0; i < 10; i++) i];
+    List<int> chapterList = [for(var i=1; i < chapterNumber + 1; i++) i];
     return chapterList.map((int chapter) {
       return ListTile(
         title: Text('$chapter'),
