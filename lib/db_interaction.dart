@@ -142,6 +142,15 @@ class DataBaseHelper {
     Passage temp = Passage(passage.book, passage.chapter, maps.length);
     return await getRelativeVerse(temp, 1);
   }
+
+  Future<int> getNumberOfChapters(String book) async {
+    if (!this.initialized) {this.initialize();}
+    final localDb = await this.db;
+    final maps = await localDb.rawQuery(
+        "SELECT chapter FROM bible WHERE book = '$book' AND verse = 1"
+    );
+    return maps.length;
+  }
 }
 
 class Passage {

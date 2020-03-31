@@ -2,8 +2,7 @@ import 'package:bible_by_heart/db_interaction.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-//import 'main.dart';
-
+import 'selectpassagepage.dart';
 
 class BiblePage extends StatefulWidget {
   final helper;
@@ -25,7 +24,6 @@ class _BiblePageState extends State<BiblePage> {
   void initState() {
     super.initState();
     Future<Passage> futureDisplayPassage = getInformation();
-    //futureDisplayPassage.then(print);
     _verseList = futureDisplayPassage.then(helper.getChapterFromPassage);
   }
 
@@ -34,13 +32,23 @@ class _BiblePageState extends State<BiblePage> {
     String book = preferences.getString("book") ?? "Gen";
     int chapter = preferences.getInt("chapter") ?? 1;
     offset = preferences.getDouble("offset") ?? 0;
-    scrollController = new ScrollController(
-        initialScrollOffset: offset
-    );
+    scrollController = new ScrollController(initialScrollOffset: offset);
     displayPassage = Passage(book, chapter, 1);
     //print("I have just read $displayPassage from SharedPreferences");
     return displayPassage;
-}
+  }
+
+  void setNewChapter(Passage passage) async {
+    displayPassage = passage;
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    preferences.setString("book", displayPassage.book);
+    preferences.setInt("chapter", displayPassage.chapter);
+    setState(() {
+      _verseList = helper.getChapterFromPassage(displayPassage);
+      scrollController.jumpTo(0);
+      offset = 0;
+    });
+  }
 
   void incrementChapter() async {
     Verse temp = await this.helper.getNextChapterVerse(displayPassage);
@@ -85,7 +93,7 @@ class _BiblePageState extends State<BiblePage> {
     };
     String normalString = '$verseNumber';
     String superString = '';
-    for (int i = 0; i<normalString.length; i++) {
+    for (int i = 0; i < normalString.length; i++) {
       superString = superString + unicodeMap[normalString[i]];
     }
     return superString;
@@ -95,21 +103,19 @@ class _BiblePageState extends State<BiblePage> {
     List<Widget> list = List.generate(verseList.length, (i) {
       return Text('${getVerseNumber(verseList[i].verse)}${verseList[i].text}');
     });
-    list.add(
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            IconButton(
-              icon: Icon(Icons.arrow_left),
-              onPressed: this.decrementChapter,
-            ),
-            IconButton(
-              icon: Icon(Icons.arrow_right),
-              onPressed: this.incrementChapter,
-            ),
-          ],
-        )
-    );
+    list.add(Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        IconButton(
+          icon: Icon(Icons.arrow_left),
+          onPressed: this.decrementChapter,
+        ),
+        IconButton(
+          icon: Icon(Icons.arrow_right),
+          onPressed: this.incrementChapter,
+        ),
+      ],
+    ));
     return list;
   }
 
@@ -121,31 +127,61 @@ class _BiblePageState extends State<BiblePage> {
         Widget result;
 
         if (snapshot.hasData) {
-          result = new NotificationListener (
-            child: ListView.builder(
-              controller: scrollController,
-              itemCount: snapshot.data.length + 1,
-              itemBuilder: (context, index) {return versesToWidget(snapshot.data)[index];},
+          result = Scaffold(
+            appBar: AppBar(
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  FlatButton(
+                    child: Row(
+                      children: <Widget>[
+                        Text(
+                          "${displayPassage.book} ${displayPassage.chapter}",
+                          style: TextStyle(
+                              color: Color.fromRGBO(255, 255, 255, 1),
+                              fontSize: 20.0
+                          ),
+                        ),
+                        Icon(Icons.arrow_drop_down, color: Color.fromRGBO(255, 255, 255, 1),)
+                      ],
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => SelectPassage(this.helper, this.setNewChapter, this.displayPassage))
+                      );
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.settings, color: Color.fromRGBO(255, 255, 255, 1),),
+                  )
+                ],
+              ),
             ),
-            onNotification: (notification) {
+            body: NotificationListener(
+              child: ListView.builder(
+                controller: scrollController,
+                itemCount: snapshot.data.length + 1,
+                itemBuilder: (context, index) {
+                  return versesToWidget(snapshot.data)[index];
+                },
+              ),
+              onNotification: (notification) {
                 if (notification is ScrollNotification) {
                   offset = notification.metrics.pixels;
                   return true;
                 }
                 return false;
               },
+            ),
           );
         } else if (snapshot.hasError) {
           result = Scaffold(
-            body: Center(
-                child: Text(snapshot.error)
-            ),
+            body: Center(child: Text(snapshot.error)),
           );
         } else {
           result = Scaffold(
-            body: Center(
-                child: Text('Awaiting result...')
-            ),
+            body: Center(child: Text('Awaiting result...')),
           );
         }
         return result;
