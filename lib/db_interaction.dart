@@ -139,7 +139,7 @@ class DataBaseHelper {
     final localDb = await this.db;
     final maps = await localDb.rawQuery(
         "SELECT * FROM bible WHERE book = '${passage.book}' AND chapter = ${passage.chapter}");
-    Passage temp = Passage(passage.book, passage.chapter, maps.length - 1);
+    Passage temp = Passage(passage.book, passage.chapter, maps.length);
     return await getRelativeVerse(temp, 1);
   }
 }

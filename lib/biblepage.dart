@@ -19,10 +19,9 @@ class _BiblePageState extends State<BiblePage> {
   var displayPassage = Passage("Gen", 1, 1);//state
 
   void incrementChapter() async {
-    print(displayPassage);
-    //Verse temp = await this.helper.getNextChapterVerse(displayPassage);
+    Verse temp = await this.helper.getNextChapterVerse(displayPassage);
     setState(() {
-      displayPassage = Passage("Gen", 2, 1);//temp.toPassage();
+      displayPassage = temp.toPassage();
     });
   }
 
@@ -45,22 +44,19 @@ class _BiblePageState extends State<BiblePage> {
           ],
         ),
       ),
-      body: MyChapterView(this, helper),
+      body: MyChapterView(this, helper, displayPassage),
     );
-  }
-  @override
-  dispose() {
-    super.dispose();
   }
 }
 
 class MyChapterView extends StatefulWidget {
   final _BiblePageState parent;
+  final displayPassage;
   final DataBaseHelper helper;
-  MyChapterView(this.parent, this.helper);
+  MyChapterView(this.parent, this.helper, this.displayPassage);
 
   @override
-  _MyChapterViewState createState() => _MyChapterViewState(this.parent, this.helper);
+  _MyChapterViewState createState() => _MyChapterViewState(this.parent, this.helper, this.displayPassage);
 }
 
 class _MyChapterViewState extends State<MyChapterView> {
@@ -68,7 +64,7 @@ class _MyChapterViewState extends State<MyChapterView> {
   final _BiblePageState parent;
   final DataBaseHelper helper;
   Future<List<Verse>> _verseList;
-  _MyChapterViewState(this.parent, this.helper): _verseList = helper.getChapterFromPassage(parent.displayPassage);
+  _MyChapterViewState(this.parent, this.helper, displayPassage): _verseList = helper.getChapterFromPassage(displayPassage);
 
 
   static getVerseNumber(int verseNumber) {
