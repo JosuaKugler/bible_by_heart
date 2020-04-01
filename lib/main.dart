@@ -46,9 +46,9 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     final _pages = <Widget>[
-      OverviewPage(),
-      LearnPage(),
-      BiblePage(this.helper),
+      OverviewPage(this.helper),
+      LearnPage(this.helper, this._onItemTapped),
+      BiblePage(this.helper, this._onItemTapped),
     ];
     return Scaffold(
       body: _pages[_selectedIndex],

@@ -6,9 +6,11 @@ import 'package:flutter/widgets.dart';
 
 class AddVersePage extends StatefulWidget {
   final DataBaseHelper helper;
-  final int id;
+  final Verse verse;
   final Future<Map<String, bool>> oldLearningStatus;
-  AddVersePage(this.helper, this.id) : oldLearningStatus = helper.getLearningStatus(id);
+  final Function _onItemTapped;
+  final Map<String, String> short2long;
+  AddVersePage(this.helper, this.verse, this._onItemTapped, this.short2long) : oldLearningStatus = helper.getLearningStatus(verse.id);
   @override
   _AddVersePageState createState() => _AddVersePageState();
 }
@@ -18,7 +20,7 @@ class _AddVersePageState extends State<AddVersePage> {
   @override
   void initState() {
     super.initState();
-    learnProgress = widget.helper.getLearningStatus(widget.id);
+    learnProgress = widget.helper.getLearningStatus(widget.verse.id);
   }
 
   Future<Map<String, bool>> changeLearningStatus(
@@ -35,18 +37,21 @@ class _AddVersePageState extends State<AddVersePage> {
           (BuildContext context, AsyncSnapshot<Map<String, bool>> snapshot) {
         Widget result;
         if (snapshot.hasData) {
-          result = //Column(
-            //mainAxisSize: MainAxisSize.min,
-            //children: <Widget>[
-              ListView(
+          result = ListView(
                 scrollDirection: Axis.vertical,
                 shrinkWrap: true,
                 children: <Widget>[
+                  Container(height: 10,),
+                  Text(
+                    "${widget.short2long[widget.verse.book]} ${widget.verse.chapter}, ${widget.verse.verse}",
+                    style: TextStyle(fontSize: 20),
+                    textAlign: TextAlign.center,
+                  ),
                   CheckboxListTile(
                     value: snapshot.data["selected"],
                     onChanged: (bool value) {
                       setState(() {
-                        learnProgress = changeLearningStatus(widget.id, {
+                        learnProgress = changeLearningStatus(widget.verse.id, {
                           "selected": value,
                           "current": snapshot.data["current"],
                           "learned": snapshot.data["learned"],
@@ -62,7 +67,7 @@ class _AddVersePageState extends State<AddVersePage> {
                     value: snapshot.data["current"],
                     onChanged: (bool value) {
                       setState(() {
-                        learnProgress = changeLearningStatus(widget.id, {
+                        learnProgress = changeLearningStatus(widget.verse.id, {
                           "selected": snapshot.data["selected"],
                           "current": value,
                           "learned": snapshot.data["learned"],
@@ -79,7 +84,7 @@ class _AddVersePageState extends State<AddVersePage> {
                     value: snapshot.data["learned"],
                     onChanged: (bool value) {
                       setState(() {
-                        learnProgress = changeLearningStatus(widget.id, {
+                        learnProgress = changeLearningStatus(widget.verse.id, {
                           "selected": snapshot.data["selected"],
                           "current": snapshot.data["current"],
                           "learned": value,
@@ -99,7 +104,10 @@ class _AddVersePageState extends State<AddVersePage> {
                         label: Text("Vers in 'Lernen' ansehen",
                           style: TextStyle(fontSize: 16, color: Colors.black),
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.pop(context);
+                          widget._onItemTapped(1);
+                        },
                       )
                     ],
                   ),
@@ -111,7 +119,7 @@ class _AddVersePageState extends State<AddVersePage> {
                         child: Text("Abbrechen"),
                         onPressed: () {
                           widget.oldLearningStatus.then((realOldLearningStatus) {
-                            learnProgress = changeLearningStatus(widget.id, realOldLearningStatus);
+                            learnProgress = changeLearningStatus(widget.verse.id, realOldLearningStatus);
                           });
                           Navigator.pop(context);
                         },
@@ -125,8 +133,6 @@ class _AddVersePageState extends State<AddVersePage> {
                     ],
                   ),
                 ],
-            //),
-            //],
           );
         } else if (snapshot.hasError) {
           result = Text("${snapshot.error}");

@@ -176,6 +176,22 @@ class DataBaseHelper {
     final int learned = newLearningStatus["learned"] ? 1: 0;
     await localDb.execute("UPDATE learn SET selected = $selected, current = $current, learned = $learned WHERE id = $id");
   }
+
+  Future<List<Verse>> getVersesOnLearningStatus(Map<String, bool> learningStatus) async {
+    final int selected = learningStatus["selected"] ? 1 : 0;
+    final int current = learningStatus["current"] ? 1 : 0;
+    final int learned = learningStatus["learned"] ? 1: 0;
+    if (!this.initialized) {this.initialize();}
+    final localDb = await this.db;
+    final totalArray = await localDb.rawQuery(
+        "SELECT id FROM learn WHERE selected = $selected AND current = $current AND learned = $learned"
+    );
+    List<Verse> matchingVerses = [];
+    for (Map idMap in totalArray) {
+      this.getVerseFromId(idMap["id"]).then((Verse verse) => matchingVerses.add(verse));
+    }
+    return matchingVerses;
+  }
 }
 
 class Passage {

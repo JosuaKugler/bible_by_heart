@@ -76,7 +76,8 @@ class BiblePage extends StatefulWidget {
     "Rev": "Offenbarung",
   };
   final helper;
-  BiblePage(this.helper);
+  final Function _onItemTapped;
+  BiblePage(this.helper, this._onItemTapped);
 
   @override
   _BiblePageState createState() => _BiblePageState(this.helper);
@@ -188,7 +189,7 @@ class _BiblePageState extends State<BiblePage> {
                 borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(20.0),
                     topRight: Radius.circular(20.0))),
-            builder: (context) => AddVersePage(widget.helper, verseList[i].id),
+            builder: (context) => AddVersePage(widget.helper, verseList[i], widget._onItemTapped, widget.short2long),
           );
         },
         child: Text(
