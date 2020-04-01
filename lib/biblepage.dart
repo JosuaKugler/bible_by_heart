@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'selectpassagepage.dart';
 import 'settingspage.dart';
+import 'addversepage.dart';
 
 class BiblePage extends StatefulWidget {
   final Map<String, String> short2long = {
@@ -104,7 +105,6 @@ class _BiblePageState extends State<BiblePage> {
     offset = preferences.getDouble("offset") ?? 0;
     fontSize = preferences.getDouble("fontSize") ?? 18;
     scrollController = new ScrollController(initialScrollOffset: offset);
-    scrollController.jumpTo(offset);
     displayPassage = Passage(book, chapter, 1);
     //print("I have just read $displayPassage from SharedPreferences");
     return displayPassage;
@@ -188,7 +188,7 @@ class _BiblePageState extends State<BiblePage> {
                 borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(20.0),
                     topRight: Radius.circular(20.0))),
-            builder: (context) => Container(),
+            builder: (context) => AddVersePage(widget.helper, verseList[i].id),
           );
         },
         child: Text(
@@ -287,7 +287,7 @@ class _BiblePageState extends State<BiblePage> {
           );
         } else if (snapshot.hasError) {
           result = Scaffold(
-            body: Center(child: Text(snapshot.error)),
+            body: Center(child: Text('${snapshot.error}')),
           );
         } else {
           result = Scaffold(

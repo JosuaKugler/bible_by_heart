@@ -151,6 +151,31 @@ class DataBaseHelper {
     );
     return maps.length;
   }
+
+  Future<Map<String, bool>> getLearningStatus(int id) async {
+    if (!this.initialized) {this.initialize();}
+    final localDb = await this.db;
+    final totalArray = await localDb.rawQuery(
+      "SELECT * FROM learn WHERE id = $id"
+    );
+    final bool selected = totalArray[0]["selected"] == 1 ? true : false;
+    final bool current = totalArray[0]["current"] == 1 ? true : false;
+    final bool learned = totalArray[0]["learned"] == 1 ? true : false;
+    return {
+      "selected" : selected,
+      "current": current,
+      "learned": learned,
+    };
+  }
+
+  void setLearningStatus(int id, Map<String, bool> newLearningStatus) async {
+    if (!this.initialized) {this.initialize();}
+    final localDb = await this.db;
+    final int selected = newLearningStatus["selected"] ? 1 : 0;
+    final int current = newLearningStatus["current"] ? 1 : 0;
+    final int learned = newLearningStatus["learned"] ? 1: 0;
+    await localDb.execute("UPDATE learn SET selected = $selected, current = $current, learned = $learned WHERE id = $id");
+  }
 }
 
 class Passage {
