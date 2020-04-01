@@ -7,34 +7,33 @@ import 'package:flutter/widgets.dart';
 class AddVersePage extends StatefulWidget {
   final DataBaseHelper helper;
   final Verse verse;
-  final Future<Map<String, bool>> oldLearningStatus;
+  final Future<LearnStatus> oldLearnStatus;
   final Function _onItemTapped;
   final Map<String, String> short2long;
-  AddVersePage(this.helper, this.verse, this._onItemTapped, this.short2long) : oldLearningStatus = helper.getLearningStatus(verse.id);
+  AddVersePage(this.helper, this.verse, this._onItemTapped, this.short2long) : oldLearnStatus = helper.getLearnStatus(verse.id);
   @override
   _AddVersePageState createState() => _AddVersePageState();
 }
 
 class _AddVersePageState extends State<AddVersePage> {
-  Future<Map<String, bool>> learnProgress;
+  Future<LearnStatus> learnStatus;
   @override
   void initState() {
     super.initState();
-    learnProgress = widget.helper.getLearningStatus(widget.verse.id);
+    learnStatus = widget.helper.getLearnStatus(widget.verse.id);
   }
 
-  Future<Map<String, bool>> changeLearningStatus(
-      int id, Map<String, bool> newLearningStatus) async {
-    widget.helper.setLearningStatus(id, newLearningStatus);
-    return newLearningStatus;
+  Future<LearnStatus> changeLearnStatus(int id, LearnStatus newLearnStatus) async {
+    widget.helper.setLearnStatus(id, newLearnStatus);
+    return newLearnStatus;
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: learnProgress,
+      future: learnStatus,
       builder:
-          (BuildContext context, AsyncSnapshot<Map<String, bool>> snapshot) {
+          (BuildContext context, AsyncSnapshot<LearnStatus> snapshot) {
         Widget result;
         if (snapshot.hasData) {
           result = ListView(
@@ -47,52 +46,56 @@ class _AddVersePageState extends State<AddVersePage> {
                     style: TextStyle(fontSize: 20),
                     textAlign: TextAlign.center,
                   ),
-                  CheckboxListTile(
-                    value: snapshot.data["selected"],
-                    onChanged: (bool value) {
+                  RadioListTile<LearnStatus>(
+                    value: LearnStatus.none,
+                    groupValue: snapshot.data,
+                    onChanged: (LearnStatus learnStatus) {
                       setState(() {
-                        learnProgress = changeLearningStatus(widget.verse.id, {
-                          "selected": value,
-                          "current": snapshot.data["current"],
-                          "learned": snapshot.data["learned"],
-                        });
+                        this.learnStatus = changeLearnStatus(widget.verse.id, learnStatus);
+                      });
+                    },
+                    title: Text("Nicht auswählen"),
+                    subtitle: snapshot.data == LearnStatus.none
+                        ? Text("Vers ist überhaupt nicht ausgewählt")
+                        : Text("Vers ist ausgewählt"),
+                  ),
+                  RadioListTile<LearnStatus>(
+                    value: LearnStatus.selected,
+                    groupValue: snapshot.data,
+                    onChanged: (LearnStatus learnStatus) {
+                      setState(() {
+                        this.learnStatus = changeLearnStatus(widget.verse.id, learnStatus);
                       });
                     },
                     title: Text("Vormerken"),
-                    subtitle: snapshot.data["selected"]
+                    subtitle: snapshot.data == LearnStatus.selected
                         ? Text("Vers ist zum Lernen vorgemerkt")
                         : Text("Vers ist noch nicht vorgemerkt"),
                   ),
-                  CheckboxListTile(
-                    value: snapshot.data["current"],
-                    onChanged: (bool value) {
+                  RadioListTile<LearnStatus>(
+                    value: LearnStatus.current,
+                    groupValue: snapshot.data,
+                    onChanged: (LearnStatus learnStatus) {
                       setState(() {
-                        learnProgress = changeLearningStatus(widget.verse.id, {
-                          "selected": snapshot.data["selected"],
-                          "current": value,
-                          "learned": snapshot.data["learned"],
-                        });
+                        this.learnStatus = changeLearnStatus(widget.verse.id, learnStatus);
                       });
                     },
                     title: Text("Lernen"),
-                    subtitle: snapshot.data["current"]
+                    subtitle: snapshot.data == LearnStatus.current
                         ? Text("Vers ist in aktueller Lernsammlung enthalten")
                         : Text(
                             "Vers ist in aktueller Lernsammlung nicht enthalten"),
                   ),
-                  CheckboxListTile(
-                    value: snapshot.data["learned"],
-                    onChanged: (bool value) {
+                  RadioListTile<LearnStatus>(
+                    value: LearnStatus.learned,
+                    groupValue: snapshot.data,
+                    onChanged: (LearnStatus learnStatus) {
                       setState(() {
-                        learnProgress = changeLearningStatus(widget.verse.id, {
-                          "selected": snapshot.data["selected"],
-                          "current": snapshot.data["current"],
-                          "learned": value,
-                        });
+                        this.learnStatus = changeLearnStatus(widget.verse.id, learnStatus);
                       });
                     },
                     title: Text("Bereits gelernt"),
-                    subtitle: snapshot.data["learned"]
+                    subtitle: snapshot.data == LearnStatus.learned
                         ? Text("Du kannst diesen Vers bereits auswendig")
                         : Text("Du kannst diesen Vers noch nicht auswendig"),
                   ),
@@ -118,8 +121,8 @@ class _AddVersePageState extends State<AddVersePage> {
                       FlatButton(
                         child: Text("Abbrechen"),
                         onPressed: () {
-                          widget.oldLearningStatus.then((realOldLearningStatus) {
-                            learnProgress = changeLearningStatus(widget.verse.id, realOldLearningStatus);
+                          widget.oldLearnStatus.then((realOldLearnStatus) {
+                            learnStatus = changeLearnStatus(widget.verse.id, realOldLearnStatus);
                           });
                           Navigator.pop(context);
                         },

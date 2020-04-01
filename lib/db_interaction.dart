@@ -177,28 +177,28 @@ class DataBaseHelper {
     return maps.length;
   }
 
-  Future<LearnStatus> getLearningStatus(int id) async {
+  Future<LearnStatus> getLearnStatus(int id) async {
     if (!this.initialized) {this.initialize();}
     final localDb = await this.db;
     final totalArray = await localDb.rawQuery(
-      "SELECT learnStatus FROM bible WHERE id = $id"
+      "SELECT * FROM bible WHERE id = $id"
     );
     return intToLearnStatus(totalArray[0]["learnStatus"]);
   }
 
-  void setLearningStatus(int id, LearnStatus newLearningStatus) async {
+  void setLearnStatus(int id, LearnStatus newLearnStatus) async {
     if (!this.initialized) {this.initialize();}
     final localDb = await this.db;
-    int learnStatusInt = learnStatusToInt(newLearningStatus);
+    int learnStatusInt = learnStatusToInt(newLearnStatus);
     await localDb.execute("UPDATE bible SET learnStatus = $learnStatusInt WHERE id = $id");
   }
 
-  Future<List<Verse>> getVersesOnLearningStatus(LearnStatus learnStatus) async {
+  Future<List<Verse>> getVersesOnLearnStatus(LearnStatus learnStatus) async {
     if (!this.initialized) {this.initialize();}
     final localDb = await this.db;
     int learnStatusInt = learnStatusToInt(learnStatus);
     final maps = await localDb.rawQuery(
-        "SELECT * FROM bible WHERE learnStatus = learnStatusInt"
+        "SELECT * FROM bible WHERE learnStatus = $learnStatusInt"
     );
     return List.generate(maps.length, (i) {
       return Verse(

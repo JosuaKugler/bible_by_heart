@@ -17,7 +17,8 @@ class _LearnPageState extends State<LearnPage> {
   @override
   void initState() {
     super.initState();
-    currentVerses = widget.helper.getVersesOnLearningStatus({"selected" : false, "current": true, "learned": false});
+    selectedVerses = widget.helper.getVersesOnLearnStatus(LearnStatus.selected);
+    currentVerses = widget.helper.getVersesOnLearnStatus(LearnStatus.current);
   }
   @override
   Widget build(BuildContext context) {
