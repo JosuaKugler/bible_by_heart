@@ -7,6 +7,27 @@ import 'package:flutter/services.dart';
 
 //this file defines a interface for the dataBase, as well as the Verse and Passage class
 
+
+LearnStatus intToLearnStatus(int learnStatusInt) {
+  switch (learnStatusInt) {
+    case 0:{ return LearnStatus.none;}break;
+    case 1:{ return LearnStatus.selected;}break;
+    case 2:{return LearnStatus.current;}break;
+    case 3:{return LearnStatus.learned;}break;
+    default:{return null;}
+  }
+}
+
+int learnStatusToInt(LearnStatus learnStatus) {
+  switch (learnStatus) {
+    case LearnStatus.none:{return 0;}break;
+    case LearnStatus.selected:{return 1;}break;
+    case LearnStatus.current:{return 2;}break;
+    case LearnStatus.learned:{return 3;}break;
+    default:{return null;}
+  }
+}
+
 class DataBaseHelper {
   Future<Database> db;
   bool initialized = false;
@@ -43,6 +64,7 @@ class DataBaseHelper {
         chapter: maps[i]['chapter'],
         verse: maps[i]['verse'],
         text: maps[i]['text'],
+        learnStatus : intToLearnStatus(maps[i]['learnStatus']),
       );
     });
   }
@@ -61,6 +83,7 @@ class DataBaseHelper {
         chapter: maps[i]['chapter'],
         verse: maps[i]['verse'],
         text: maps[i]['text'],
+        learnStatus : intToLearnStatus(maps[i]['learnStatus']),
       );
     });
   }
@@ -77,6 +100,7 @@ class DataBaseHelper {
       chapter: resultVerseMap['chapter'],
       verse: resultVerseMap['verse'],
       text: resultVerseMap['text'],
+      learnStatus : intToLearnStatus(resultVerseMap['learnStatus']),
     );
   }
 
@@ -96,6 +120,7 @@ class DataBaseHelper {
       chapter: resultVerseMap['chapter'],
       verse: resultVerseMap['verse'],
       text: resultVerseMap['text'],
+      learnStatus : intToLearnStatus(resultVerseMap['learnStatus']),
     );
   }
 
@@ -152,45 +177,39 @@ class DataBaseHelper {
     return maps.length;
   }
 
-  Future<Map<String, bool>> getLearningStatus(int id) async {
+  Future<LearnStatus> getLearningStatus(int id) async {
     if (!this.initialized) {this.initialize();}
     final localDb = await this.db;
     final totalArray = await localDb.rawQuery(
-      "SELECT * FROM learn WHERE id = $id"
+      "SELECT learnStatus FROM bible WHERE id = $id"
     );
-    final bool selected = totalArray[0]["selected"] == 1 ? true : false;
-    final bool current = totalArray[0]["current"] == 1 ? true : false;
-    final bool learned = totalArray[0]["learned"] == 1 ? true : false;
-    return {
-      "selected" : selected,
-      "current": current,
-      "learned": learned,
-    };
+    return intToLearnStatus(totalArray[0]["learnStatus"]);
   }
 
-  void setLearningStatus(int id, Map<String, bool> newLearningStatus) async {
+  void setLearningStatus(int id, LearnStatus newLearningStatus) async {
     if (!this.initialized) {this.initialize();}
     final localDb = await this.db;
-    final int selected = newLearningStatus["selected"] ? 1 : 0;
-    final int current = newLearningStatus["current"] ? 1 : 0;
-    final int learned = newLearningStatus["learned"] ? 1: 0;
-    await localDb.execute("UPDATE learn SET selected = $selected, current = $current, learned = $learned WHERE id = $id");
+    int learnStatusInt = learnStatusToInt(newLearningStatus);
+    await localDb.execute("UPDATE bible SET learnStatus = $learnStatusInt WHERE id = $id");
   }
 
-  Future<List<Verse>> getVersesOnLearningStatus(Map<String, bool> learningStatus) async {
-    final int selected = learningStatus["selected"] ? 1 : 0;
-    final int current = learningStatus["current"] ? 1 : 0;
-    final int learned = learningStatus["learned"] ? 1: 0;
+  Future<List<Verse>> getVersesOnLearningStatus(LearnStatus learnStatus) async {
     if (!this.initialized) {this.initialize();}
     final localDb = await this.db;
-    final totalArray = await localDb.rawQuery(
-        "SELECT id FROM learn WHERE selected = $selected AND current = $current AND learned = $learned"
+    int learnStatusInt = learnStatusToInt(learnStatus);
+    final maps = await localDb.rawQuery(
+        "SELECT * FROM bible WHERE learnStatus = learnStatusInt"
     );
-    List<Verse> matchingVerses = [];
-    for (Map idMap in totalArray) {
-      this.getVerseFromId(idMap["id"]).then((Verse verse) => matchingVerses.add(verse));
-    }
-    return matchingVerses;
+    return List.generate(maps.length, (i) {
+      return Verse(
+        id: maps[i]['id'],
+        book: maps[i]['book'],
+        chapter: maps[i]['chapter'],
+        verse: maps[i]['verse'],
+        text: maps[i]['text'],
+        learnStatus : intToLearnStatus(maps[i]['learnStatus']),
+      );
+    });
   }
 }
 
@@ -207,14 +226,22 @@ class Passage {
   }
 }
 
+enum LearnStatus {
+  none,
+  selected,
+  current,
+  learned
+}
+
 class Verse {
   final int id;
   final String book;
   final int chapter;
   final int verse;
   final String text;
+  final LearnStatus learnStatus;
 
-  Verse({this.id, this.book, this.chapter, this.verse, this.text});
+  Verse({this.id, this.book, this.chapter, this.verse, this.text, this.learnStatus});
 
   Map<String, dynamic> toMap() {
     return {
@@ -223,6 +250,7 @@ class Verse {
       'chapter': chapter,
       'verse': verse,
       'text': text,
+      'learnStatus': learnStatus,
     };
   }
 
@@ -232,6 +260,6 @@ class Verse {
 
   @override
   String toString() {
-    return 'Verse{id: $id, book: $book, chapter: $chapter, verse: $verse, text: $text}';
+    return 'Verse{id: $id, book: $book, chapter: $chapter, verse: $verse, text: $text, learnStatus $learnStatus}';
   }
 }

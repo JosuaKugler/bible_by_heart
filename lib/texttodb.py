@@ -8,11 +8,7 @@ c.execute("DROP TABLE IF EXISTS bible")
 c.execute("DROP TABLE IF EXISTS learn")
 
 c.execute(
-    "CREATE TABLE bible (id INTEGER PRIMARY KEY,book TEXT NOT NULL,chapter INTEGER NOT NULL,verse INTEGER NOT NULL,text TEXT NOT NULL);"
-)
-
-c.execute(
-    "CREATE TABLE learn ( id INTEGER, selected INTEGER, current INTEGER, learned INTEGER );"
+    "CREATE TABLE bible (id INTEGER PRIMARY KEY,book TEXT NOT NULL,chapter INTEGER NOT NULL,verse INTEGER NOT NULL,text TEXT NOT NULL, learnStatus INTEGER NOT NULL);"
 )
 
 conn.commit()
@@ -39,17 +35,15 @@ for verse in verses[:-13]:
             "book": verse[:3], 
             "chapter": int(numbers[0]), 
             "verse": int(numbers[1]), 
-            "text": text
+            "text": text,
+            "learnStatus" : 0
         }
     )
 
 for id, verse in enumerate(verseMap):
     c.execute(
-        f'''INSERT INTO bible VALUES ({id}, "{verse['book']}", {verse['chapter']}, {verse['verse']}, "{verse['text']}")'''
+        f'''INSERT INTO bible VALUES ({id}, "{verse['book']}", {verse['chapter']}, {verse['verse']}, "{verse['text']}", {verse['learnStatus']})'''
         )
-    c.execute(
-        f'INSERT INTO learn VALUES ({id}, 0, 0, 0)'
-    )
 
 conn.commit()
 conn.close()
