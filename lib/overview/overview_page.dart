@@ -2,13 +2,20 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../backend/db_interaction.dart';
 import 'display_selected_page.dart';
+import 'display_current_page.dart';
+import 'display_learned_page.dart';
+import 'display_today_page.dart';
 
 class OverviewPage extends StatelessWidget {
   final DataBaseHelper helper;
-  OverviewPage(this.helper);
+  final Function _onItemTapped;
+  OverviewPage(this.helper, this._onItemTapped);
 
   Future<List<int>> getData() async {
-    return [1,2,3,4,5];
+    final selected = await helper.getVersesOnLearnStatus(LearnStatus.selected);
+    final current = await helper.getVersesOnLearnStatus(LearnStatus.current);
+    final learned = await helper.getVersesOnLearnStatus(LearnStatus.learned);
+    return [selected.length,current.length,learned.length,31172];//data for selected, current etc.
   }
   @override
   Widget build(BuildContext context) {
@@ -29,23 +36,35 @@ class OverviewPage extends StatelessWidget {
               mainAxisSpacing: 40,
               children: <Widget>[
                 GestureDetector(
-                    onTap: () {},//show selected Verses in dismissible listView
+                    onTap: () {
+                      Navigator.push(context,
+                      MaterialPageRoute(
+                        builder: (context) => SelectedList(this.helper),
+                      ));
+                    },//show selected Verses in dismissible listView
                     child: DisplaySelected(snapshot.data),
                 ),
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  child: const Text('Heed not the rabble'),
-                  color: Colors.teal[200],
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(
+                          builder: (context) => CurrentList(this.helper),
+                        ));
+                  }, //show current Verses in dismissible listView (with stats for each verse?)
+                  child: DisplayCurrent(snapshot.data),
                 ),
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  child: const Text('Sound of screams but the'),
-                  color: Colors.teal[300],
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(
+                          builder: (context) => LearnedList(this.helper),
+                        ));
+                  }, //show learned Verses in listView (with stats for each verse?)
+                  child: DisplayLearned(snapshot.data),
                 ),
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  child: const Text('Who scream'),
-                  color: Colors.teal[400],
+                GestureDetector(
+                  onTap: () => _onItemTapped(2),
+                  child: DisplayToday(snapshot.data),
                 ),
               ],
             ),
@@ -53,7 +72,14 @@ class OverviewPage extends StatelessWidget {
         } else if (snapshot.hasError) {
           result = Text("${snapshot.error}");
         } else {
-          result = Text("Awaiting result");
+          result = Scaffold(
+            appBar: AppBar(
+              title: Text('Übersicht'),
+            ),
+            body: Center(
+              child: Text("Awaiting result"),
+            ),
+          );
         }
         return result;
       },

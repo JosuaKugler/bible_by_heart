@@ -200,6 +200,7 @@ class DataBaseHelper {
     final maps = await localDb.rawQuery(
         "SELECT * FROM bible WHERE learnStatus = $learnStatusInt"
     );
+    //print(maps);
     return List.generate(maps.length, (i) {
       return Verse(
         id: maps[i]['id'],
