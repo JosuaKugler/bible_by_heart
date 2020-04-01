@@ -1,10 +1,10 @@
-import 'package:bible_by_heart/db_interaction.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'selectpassagepage.dart';
-import 'settingspage.dart';
-import 'addversepage.dart';
+import '../backend/db_interaction.dart';
+import 'select_passage_page.dart';
+import 'settings_page.dart';
+import 'add_verse_page.dart';
 
 class BiblePage extends StatefulWidget {
   final Map<String, String> short2long = {

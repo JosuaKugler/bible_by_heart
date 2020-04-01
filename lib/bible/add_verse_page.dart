@@ -1,8 +1,8 @@
-import 'package:bible_by_heart/db_interaction.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import '../backend/db_interaction.dart';
 
 class AddVersePage extends StatefulWidget {
   final DataBaseHelper helper;

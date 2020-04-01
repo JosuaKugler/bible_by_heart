@@ -1,7 +1,7 @@
-import 'package:bible_by_heart/biblepage.dart';
-import 'package:bible_by_heart/db_interaction.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../backend/db_interaction.dart';
+//import 'bible_page.dart';
 
 class SelectPassage extends StatefulWidget {
   final DataBaseHelper helper;

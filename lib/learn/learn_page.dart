@@ -1,6 +1,6 @@
-import 'package:bible_by_heart/db_interaction.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../backend/db_interaction.dart';
 
 class LearnPage extends StatefulWidget {
   final DataBaseHelper helper;

@@ -194,7 +194,7 @@ class DataBaseHelper {
   }
 
   Future<List<Verse>> getVersesOnLearnStatus(LearnStatus learnStatus) async {
-    if (!this.initialized) {this.initialize();}
+    if (!this.initialized) await this.initialize();
     final localDb = await this.db;
     int learnStatusInt = learnStatusToInt(learnStatus);
     final maps = await localDb.rawQuery(
