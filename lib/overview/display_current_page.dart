@@ -72,7 +72,8 @@ class CurrentList extends StatelessWidget {
                     ),
                     child: ListTile(
                       title: Text('${snapshot.data[index].book} ${snapshot.data[index].chapter}, ${snapshot.data[index].verse}'),
-                      subtitle: Text('${snapshot.data[index].text}'),
+                      subtitle: Text('${snapshot.data[index].text}, ${snapshot.data[index].correct} out of ${snapshot.data[index].maxCorrect}'),
+
                     ),
                   );
                 }),

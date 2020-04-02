@@ -231,7 +231,16 @@ class DataBaseHelper {
   void decreaseCorrect(int id, int amount) async {
     if (!this.initialized) await this.initialize();
     final localDb = await this.db;
-    await localDb.execute("UPDATE bible SET correct = correct - $amount WHERE id = $id");
+    final maps = await localDb.rawQuery("SELECT correct FROM bible WHERE id = $id");
+    int oldCorrect = maps[0]['correct'];
+    int newCorrect = (oldCorrect - amount > 0) ? oldCorrect - amount : 0;
+    await localDb.execute("UPDATE bible SET correct = $newCorrect WHERE id = $id");
+  }
+
+  void setCorrect(int id, int value) async {
+    if (!this.initialized) await this.initialize();
+    final localDb = await this.db;
+    await localDb.execute("UPDATE bible SET correct = $value WHERE id = $id");
   }
 
   Future<int> getCorrect(int id) async {

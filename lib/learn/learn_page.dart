@@ -74,6 +74,7 @@ class _LearnPageState extends State<LearnPage> {
           currentVersesShuffle.then((List<Verse> presentCVS) {
         Verse localCurrentVerse = presentCVS.removeLast();
         widget.helper.setMaxCorrect(localCurrentVerse.id, newMaxCorrect);
+        widget.helper.setCorrect(localCurrentVerse.id, 0);
         presentCVS.insert(0, localCurrentVerse);
         return presentCVS;
       });
@@ -95,7 +96,8 @@ class _LearnPageState extends State<LearnPage> {
     Verse verse = await currentVersesShuffle.then((list) => list.last);
     widget.helper.setLearnStatus(verse.id, LearnStatus.learned);
     widget.helper
-        .setMaxCorrect(verse.id, 10); //probably add different defaultMaxCorrect
+        .setMaxCorrect(verse.id, 10); // probably add different defaultMaxCorrect
+    widget.helper.setCorrect(verse.id, 0);
     setState(() {
       currentVersesShuffle =
           currentVersesShuffle.then((List<Verse> presentCVS) {
