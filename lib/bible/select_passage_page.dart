@@ -7,8 +7,7 @@ class SelectPassage extends StatefulWidget {
   final DataBaseHelper helper;
   final Passage displayPassage;
   final Function setNewChapter;
-  final Map<String, String> short2long;
-  SelectPassage(this.helper, this.setNewChapter, this.displayPassage, this.short2long);
+  SelectPassage(this.helper, this.setNewChapter, this.displayPassage);
   @override
   _SelectPassageState createState() =>
       _SelectPassageState(this.helper, this.setNewChapter, this.displayPassage);
@@ -107,12 +106,12 @@ class _SelectPassageState extends State<SelectPassage>
 
   List<ListTile> generateBookList() {
     List<String> bookList = [];
-    widget.short2long.forEach((key, value) {
+    short2long.forEach((key, value) {
       bookList.add(key);
     });
     return bookList.map((String book) {
       return ListTile(
-        title: Text(widget.short2long[book]),
+        title: Text(short2long[book]),
         onTap: () {
           setState(() {
             this.book = book;

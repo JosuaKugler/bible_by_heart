@@ -9,8 +9,7 @@ class AddVersePage extends StatefulWidget {
   final Verse verse;
   final Future<LearnStatus> oldLearnStatus;
   final Function _onItemTapped;
-  final Map<String, String> short2long;
-  AddVersePage(this.helper, this.verse, this._onItemTapped, this.short2long) : oldLearnStatus = helper.getLearnStatus(verse.id);
+  AddVersePage(this.helper, this.verse, this._onItemTapped) : oldLearnStatus = helper.getLearnStatus(verse.id);
   @override
   _AddVersePageState createState() => _AddVersePageState();
 }
@@ -42,7 +41,7 @@ class _AddVersePageState extends State<AddVersePage> {
                 children: <Widget>[
                   Container(height: 10,),
                   Text(
-                    "${widget.short2long[widget.verse.book]} ${widget.verse.chapter}, ${widget.verse.verse}",
+                    "${short2long[widget.verse.book]} ${widget.verse.chapter}, ${widget.verse.verse}",
                     style: TextStyle(fontSize: 20),
                     textAlign: TextAlign.center,
                   ),

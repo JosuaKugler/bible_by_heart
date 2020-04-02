@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../backend/db_interaction.dart';
+import 'cue_card.dart';
 
 class LearnPage extends StatefulWidget {
   final DataBaseHelper helper;
@@ -11,88 +13,138 @@ class LearnPage extends StatefulWidget {
 }
 
 class _LearnPageState extends State<LearnPage> {
-  Future<List<Verse>> selectedVerses;
-  Future<List<Verse>> currentVerses;
-  Future<List<Verse>> learnedVerses;
   Future<List<Verse>> currentVersesShuffle;
-  Future<Verse> currentVerse;
 
-  Future<List<Verse>> getCurrentVersesShuffle(Future<List<Verse>> currentVerses) {
-    //get from shared preferences
-    //otherwise: currentVerses.then((List<Verse> currentVerses) {currentVerses.shuffle(); return currentVerses;});
+  @override
+  void initState() {
+    super.initState();
+    currentVersesShuffle = getCurrentVersesShuffle();
   }
 
-  Future<Verse> getCurrentVerse() async {
-    return await currentVersesShuffle.then((list) => list.last);
+  Future<List<Verse>> getCurrentVersesShuffle() async {
+    Future<List<Verse>> currentVerses =
+        widget.helper.getVersesOnLearnStatus(LearnStatus.current);
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    List<String> shuffleFromPreferences =
+        preferences.getStringList("shuffledList") ?? null;
+    if (shuffleFromPreferences == null) {
+      return await currentVerses.then((List<Verse> currentVerses) {
+        currentVerses.shuffle();
+        return currentVerses;
+      });
+    } else {
+      List<Verse> fromPrefs = [];
+      for (String idString in shuffleFromPreferences) {
+        Verse verse = await widget.helper.getVerseFromId(int.parse(idString));
+        fromPrefs.add(verse);
+      }
+      //match fromPrefs with currentVerses.
+      return await currentVerses.then((List<Verse> presentCurrentVerses) {
+        List<Verse> localCVS = [];
+        for (Verse verse in presentCurrentVerses) {
+          if (!fromPrefs.contains(verse)) {
+            fromPrefs.insert(0, verse);
+          }
+        }
+        for (Verse verse in fromPrefs) {
+          if (presentCurrentVerses.contains(verse)) {
+            localCVS.add(verse);
+          }
+        }
+        return localCVS;
+      });
+    }
   }
 
   //call when Verse specific updates have been done and Verse hasn't reached LearnStatus.learned
   void continueCurrentVerse() async {
-    //todo: put at beginning of CVS and thereby call setState
+    setState(() {
+      currentVersesShuffle =
+          currentVersesShuffle.then((List<Verse> presentCVS) {
+        Verse localCurrentVerse = presentCVS.removeLast();
+        presentCVS.insert(0, localCurrentVerse);
+        return presentCVS;
+      });
+    });
+  }
+
+  void continueCurrentVerseAnyway(int newMaxCorrect) async {
+    setState(() {
+      currentVersesShuffle =
+          currentVersesShuffle.then((List<Verse> presentCVS) {
+        Verse localCurrentVerse = presentCVS.removeLast();
+        widget.helper.setMaxCorrect(localCurrentVerse.id, newMaxCorrect);
+        presentCVS.insert(0, localCurrentVerse);
+        return presentCVS;
+      });
+    });
   }
 
   //call when the current Verse was correct
   Future<bool> currentVerseLearned() async {
     Verse verse = await currentVersesShuffle.then((list) => list.last);
-    //todo: update database with new information about verse
-    //todo: get from database whether this verse has reached maxCorrect
-    bool maxCorrect = true;
-    return maxCorrect;
+    await widget.helper.increaseCorrect(verse.id);
+    int correct = await widget.helper.getCorrect(verse.id);
+    int maxCorrect = await widget.helper.getMaxCorrect(verse.id);
+    bool maxCorrectReached = correct >= maxCorrect;
+    return maxCorrectReached;
   }
 
   //call when the current Verse has reached LearnStatus.learned
   void finishCurrentVerse() async {
-    //todo: change [newMaxCorrect] to [defaultMaxCorrect] in Database and set LearnStatus to learned
-    //todo: remove from CVS and thereby call setState
+    Verse verse = await currentVersesShuffle.then((list) => list.last);
+    widget.helper.setLearnStatus(verse.id, LearnStatus.learned);
+    widget.helper
+        .setMaxCorrect(verse.id, 10); //probably add different defaultMaxCorrect
+    setState(() {
+      currentVersesShuffle =
+          currentVersesShuffle.then((List<Verse> presentCVS) {
+        presentCVS.removeLast();
+        return presentCVS;
+      });
+    });
   }
 
   //call when current Verse was wrong
   void currentVerseWrong() async {
     Verse verse = await currentVersesShuffle.then((list) => list.last);
-    //todo: update database with new information about verse
+    await widget.helper.decreaseCorrect(verse.id, 2); //probably change default
     await this.continueCurrentVerse();
   }
 
-  @override
-  void initState() {
-    super.initState();
-    selectedVerses = widget.helper.getVersesOnLearnStatus(LearnStatus.selected);
-    currentVerses = widget.helper.getVersesOnLearnStatus(LearnStatus.current);
-    learnedVerses = widget.helper.getVersesOnLearnStatus(LearnStatus.learned);
-    currentVersesShuffle = getCurrentVersesShuffle(currentVerses);
-    currentVerse = getCurrentVerse();
+  writePreferences() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    await currentVersesShuffle.then((List<Verse> presentCVS) {
+      List<String> presentCVSasString =
+          presentCVS.map((Verse verse) => '${verse.id}').toList();
+      preferences.setStringList("shuffledList", presentCVSasString);
+    });
   }
 
-  Future<List<List<Verse>>> _verseLists() async {
-    List<List<Verse>> verses = [];
-    selectedVerses.then((list) => verses.add(list));
-    currentVerses.then((list) => verses.add(list));
-    learnedVerses.then((list) => verses.add(list));
-    currentVersesShuffle.then((list) => verses.add(list));//current verse is last verse in [currentVersesShuffle]
-    return verses;
+  @override
+  void dispose() {
+    super.dispose();
+    writePreferences();
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: _verseLists(),
-      builder: (context, AsyncSnapshot<List<List<Verse>>> snapshot) {
+      future: currentVersesShuffle,
+      builder: (context, AsyncSnapshot<List<Verse>> snapshot) {
         Widget result;
         if (snapshot.hasData) {
-          List<Verse> mySelectedVerses = snapshot.data[0];
-          List<Verse> myCurrentVerses = snapshot.data[1];
-          List<Verse> myLearnedVerses = snapshot.data[2];
-          List<Verse> myCurrentVersesShuffle = snapshot.data[3];
-
           return Scaffold(
             appBar: AppBar(
               title: Text("Lernen"),
             ),
-            body: Container(
-              padding: EdgeInsets.all(20),
-              child: Container(
-
-              ),
+            body: CueCard(
+              snapshot.data,
+              this.currentVerseLearned,
+              this.currentVerseWrong,
+              this.continueCurrentVerse,
+              this.finishCurrentVerse,
+              this.continueCurrentVerseAnyway,
             ),
           );
         } else if (snapshot.hasError) {
