@@ -39,7 +39,7 @@ class DataBaseHelper {
     String path = join(documentsDirectory.path, "bible_database.db");
 
     // Only copy if the database doesn't exist
-    if (FileSystemEntity.typeSync(path) == FileSystemEntityType.notFound) {
+    if (true || FileSystemEntity.typeSync(path) == FileSystemEntityType.notFound) {
       // Load database from asset and copy
       ByteData data = await rootBundle.load(join('assets', 'bible.db'));
       List<int> bytes =
@@ -65,6 +65,8 @@ class DataBaseHelper {
         verse: maps[i]['verse'],
         text: maps[i]['text'],
         learnStatus : intToLearnStatus(maps[i]['learnStatus']),
+        correct: maps[i]['correct'],
+        maxCorrect: maps[i]['maxCorrect'],
       );
     });
   }
@@ -84,6 +86,8 @@ class DataBaseHelper {
         verse: maps[i]['verse'],
         text: maps[i]['text'],
         learnStatus : intToLearnStatus(maps[i]['learnStatus']),
+        correct: maps[i]['correct'],
+        maxCorrect: maps[i]['maxCorrect'],
       );
     });
   }
@@ -101,6 +105,8 @@ class DataBaseHelper {
       verse: resultVerseMap['verse'],
       text: resultVerseMap['text'],
       learnStatus : intToLearnStatus(resultVerseMap['learnStatus']),
+      correct: resultVerseMap['correct'],
+      maxCorrect: resultVerseMap['maxCorrect'],
     );
   }
 
@@ -121,6 +127,8 @@ class DataBaseHelper {
       verse: resultVerseMap['verse'],
       text: resultVerseMap['text'],
       learnStatus : intToLearnStatus(resultVerseMap['learnStatus']),
+      correct: resultVerseMap['correct'],
+      maxCorrect: resultVerseMap['maxCorrect'],
     );
   }
 
@@ -200,7 +208,6 @@ class DataBaseHelper {
     final maps = await localDb.rawQuery(
         "SELECT * FROM bible WHERE learnStatus = $learnStatusInt"
     );
-    //print(maps);
     return List.generate(maps.length, (i) {
       return Verse(
         id: maps[i]['id'],
@@ -209,8 +216,42 @@ class DataBaseHelper {
         verse: maps[i]['verse'],
         text: maps[i]['text'],
         learnStatus : intToLearnStatus(maps[i]['learnStatus']),
+        correct: maps[i]['correct'],
+        maxCorrect: maps[i]['maxCorrect'],
       );
     });
+  }
+
+  void increaseCorrect(int id) async {
+    if (!this.initialized) await this.initialize();
+    final localDb = await this.db;
+    await localDb.execute("UPDATE bible SET correct = correct + 1 WHERE id = $id");
+  }
+
+  void decreaseCorrect(int id, int amount) async {
+    if (!this.initialized) await this.initialize();
+    final localDb = await this.db;
+    await localDb.execute("UPDATE bible SET correct = correct - $amount WHERE id = $id");
+  }
+
+  Future<int> getCorrect(int id) async {
+    if (!this.initialized) await this.initialize();
+    final localDb = await this.db;
+    final maps = await localDb.rawQuery("SELECT correct FROM bible WHERE id = $id");
+    return maps[0]['correct'];
+  }
+
+  void setMaxCorrect(int id, int newMaxCorrect) async {
+    if (!this.initialized) await this.initialize();
+    final localDb = await this.db;
+    await localDb.execute("UPDATE bible SET maxCorrect = $newMaxCorrect WHERE id = $id");
+  }
+
+  Future<int> getMaxCorrect(int id) async {
+    if (!this.initialized) await this.initialize();
+    final localDb = await this.db;
+    final maps = await localDb.rawQuery("SELECT maxCorrect FROM bible WHERE id = $id");
+    return maps[0]['maxCorrect'];
   }
 }
 
@@ -241,8 +282,10 @@ class Verse {
   final int verse;
   final String text;
   final LearnStatus learnStatus;
+  final int correct;
+  final int maxCorrect;
 
-  Verse({this.id, this.book, this.chapter, this.verse, this.text, this.learnStatus});
+  Verse({this.id, this.book, this.chapter, this.verse, this.text, this.learnStatus, this.correct, this.maxCorrect});
 
   Map<String, dynamic> toMap() {
     return {
@@ -252,6 +295,8 @@ class Verse {
       'verse': verse,
       'text': text,
       'learnStatus': learnStatus,
+      'correct' : correct,
+      'maxCorrect' : maxCorrect,
     };
   }
 
@@ -261,6 +306,6 @@ class Verse {
 
   @override
   String toString() {
-    return 'Verse{id: $id, book: $book, chapter: $chapter, verse: $verse, text: $text, learnStatus $learnStatus}';
+    return 'Verse{id: $id, book: $book, chapter: $chapter, verse: $verse, text: $text, learnStatus $learnStatus}, correct $correct, maxCorrect $maxCorrect';
   }
 }
