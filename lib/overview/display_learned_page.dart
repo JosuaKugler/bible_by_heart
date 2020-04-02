@@ -15,11 +15,24 @@ class DisplayLearned extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
-              Text("${data[2]}", style: TextStyle(fontSize: "${data[2]}".length == 1 ? 65 : "${data[3]}".length < 3 ? 40 : 20),),
-              Text("${data[2] == 1 ? "Vers" : "Verse"}",style: TextStyle(fontSize: 20),),
+              Text(
+                "${data[2]}",
+                style: TextStyle(
+                    fontSize: "${data[2]}".length == 1
+                        ? 65
+                        : "${data[3]}".length < 3 ? 40 : 20),
+              ),
+              Text(
+                "${data[2] == 1 ? "Vers" : "Verse"}",
+                style: TextStyle(fontSize: 20),
+              ),
             ],
           ),
-          Text("bereits gelernt", textAlign: TextAlign.left,style: TextStyle(fontSize: 16),)
+          Text(
+            "bereits gelernt",
+            textAlign: TextAlign.left,
+            style: TextStyle(fontSize: 16),
+          )
         ],
       ),
     );
@@ -40,42 +53,47 @@ class LearnedList extends StatelessWidget {
             appBar: AppBar(
               title: Text("Gelernte Verse"),
             ),
-            body: ListView.builder(
-                itemCount: snapshot.data.length,
-                itemBuilder: (context, index) {
-                  return Dismissible(
-                    onDismissed: (DismissDirection direction) async {
-                      if (direction == DismissDirection.endToStart) {
-                        await helper.setLearnStatus(snapshot.data[index].id,
-                            LearnStatus.none);
-                      } else {
-                        await helper.setLearnStatus(snapshot.data[index].id,
-                            LearnStatus.current);
-                      }
-                    },
-                    key: UniqueKey(),
-                    secondaryBackground: Container(
-                      child: Text(
-                        'Lernstatus zurücksetzen',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      color: Colors.red,
-                      alignment: Alignment(0.8,0.0),
-                    ),
-                    background: Container(
-                      child: Text(
-                        'Nochmal Lernen',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      color: Colors.green,
-                      alignment: Alignment(-0.8, 0.0),
-                    ),
-                    child: ListTile(
-                      title: Text('${snapshot.data[index].book} ${snapshot.data[index].chapter}, ${snapshot.data[index].verse}'),
-                      subtitle: Text('${snapshot.data[index].text}'),
-                    ),
-                  );
-                }),
+            body: (snapshot.data.length > 0)
+                ? ListView.builder(
+                    itemCount: snapshot.data.length,
+                    itemBuilder: (context, index) {
+                      return Dismissible(
+                        onDismissed: (DismissDirection direction) async {
+                          if (direction == DismissDirection.endToStart) {
+                            await helper.setLearnStatus(
+                                snapshot.data[index].id, LearnStatus.none);
+                          } else {
+                            await helper.setLearnStatus(
+                                snapshot.data[index].id, LearnStatus.current);
+                          }
+                        },
+                        key: UniqueKey(),
+                        secondaryBackground: Container(
+                          child: Text(
+                            'Lernstatus zurücksetzen',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          color: Colors.red,
+                          alignment: Alignment(0.8, 0.0),
+                        ),
+                        background: Container(
+                          child: Text(
+                            'Nochmal Lernen',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          color: Colors.green,
+                          alignment: Alignment(-0.8, 0.0),
+                        ),
+                        child: ListTile(
+                          title: Text(
+                              '${snapshot.data[index].book} ${snapshot.data[index].chapter}, ${snapshot.data[index].verse}'),
+                          subtitle: Text('${snapshot.data[index].text}'),
+                        ),
+                      );
+                    })
+                : Center(
+                    child: Text('Noch keine Verse'),
+                  ),
           );
         } else if (snapshot.hasError) {
           result = Text('$snapshot.error');
@@ -84,7 +102,7 @@ class LearnedList extends StatelessWidget {
             appBar: AppBar(
               title: Text("Gelernte Verse"),
             ),
-            body: Text("Awaiting result..."),
+            body: Text("Laden..."),
           );
         }
         return result;

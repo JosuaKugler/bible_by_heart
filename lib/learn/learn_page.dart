@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../backend/db_interaction.dart';
 import 'cue_card.dart';
+import 'select_verse_page.dart';
 
 class LearnPage extends StatefulWidget {
   final DataBaseHelper helper;
@@ -95,8 +96,8 @@ class _LearnPageState extends State<LearnPage> {
   void finishCurrentVerse() async {
     Verse verse = await currentVersesShuffle.then((list) => list.last);
     widget.helper.setLearnStatus(verse.id, LearnStatus.learned);
-    widget.helper
-        .setMaxCorrect(verse.id, 10); // probably add different defaultMaxCorrect
+    widget.helper.setMaxCorrect(
+        verse.id, 10); // probably add different defaultMaxCorrect
     widget.helper.setCorrect(verse.id, 0);
     setState(() {
       currentVersesShuffle =
@@ -148,6 +149,20 @@ class _LearnPageState extends State<LearnPage> {
               this.finishCurrentVerse,
               this.continueCurrentVerseAnyway,
             ),
+            floatingActionButton: FloatingActionButton(
+              child: Icon(Icons.add),
+              onPressed: () async {
+                Passage newVerse = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => SelectPassage(widget.helper)));
+                int newVerseId = await widget.helper.getIdFromPassage(newVerse);
+                widget.helper.setLearnStatus(newVerseId, LearnStatus.current);
+                setState(() {
+                  currentVersesShuffle = getCurrentVersesShuffle();
+                });
+              },
+            ),
           );
         } else if (snapshot.hasError) {
           result = Text('${snapshot.error}');
@@ -157,7 +172,7 @@ class _LearnPageState extends State<LearnPage> {
               title: Text("Lernen"),
             ),
             body: Center(
-              child: Text("Awaiting result..."),
+              child: Text("Laden..."),
             ),
           );
         }

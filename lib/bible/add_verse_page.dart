@@ -139,7 +139,7 @@ class _AddVersePageState extends State<AddVersePage> {
         } else if (snapshot.hasError) {
           result = Text("${snapshot.error}");
         } else {
-          result = Text("Awaiting result");
+          result = Text("Laden...");
         }
         return result;
       },

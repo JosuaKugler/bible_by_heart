@@ -224,7 +224,10 @@ class _BiblePageState extends State<BiblePage> {
           );
         } else {
           result = Scaffold(
-            body: Center(child: Text('Awaiting result...')),
+            appBar: AppBar(
+              title: Text("Bibel"),
+            ),
+            body: Center(child: Text('Laden...')),
           );
         }
         return result;

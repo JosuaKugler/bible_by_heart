@@ -77,7 +77,7 @@ class OverviewPage extends StatelessWidget {
               title: Text('Übersicht'),
             ),
             body: Center(
-              child: Text("Awaiting result"),
+              child: Text("Laden..."),
             ),
           );
         }
