@@ -25,7 +25,7 @@ class _FlipCueCardState extends State<FlipCueCard>
   void initState() {
     super.initState();
     _animationController =
-        AnimationController(vsync: this, duration: Duration(seconds: 1));
+        AnimationController(vsync: this, duration: Duration(milliseconds: 1000));
     _animation = Tween(end: 1.0, begin: 0.0).animate(_animationController)
       ..addListener(() {
         setState(() {});
@@ -97,7 +97,7 @@ class FrontSide extends StatelessWidget {
     return Stack(
       children: <Widget>[
         Center(
-          child: new Image.asset(
+          child: Image.asset(
             'assets/karteikarte.png',
             width: size.width,
             height: size.height,
@@ -105,12 +105,15 @@ class FrontSide extends StatelessWidget {
           ),
         ),
         Center(
-          child: Text(
-              '${short2long[verse.book]} ${verse.chapter}, ${verse.verse}',
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 30.0,
-                  color: Colors.black)),
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Text(
+                '${short2long[verse.book]} ${verse.chapter}, ${verse.verse}',
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 30.0,
+                    color: Colors.black)),
+          ),
         ),
       ],
     );
@@ -133,30 +136,37 @@ class BackSide extends StatelessWidget {
         direction: DismissDirection.horizontal,
         child: Stack(
           children: <Widget>[
-            Center(
-              child: new Image.asset(
-                'assets/karteikarte.png',
-                width: size.width,
-                height: size.height,
-                fit: BoxFit.fill,
+            Transform(
+              alignment: Alignment.center,
+              transform: Matrix4.rotationX(pi),
+              child: Center(
+                child: Image.asset(
+                  'assets/karteikarte.png',
+                  width: size.width,
+                  height: size.height,
+                  fit: BoxFit.fill,
+                ),
               ),
             ),
             Center(
-              child: Text('${verse.text}',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20.0,
-                      color: Colors.black)),
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Text('${verse.text}',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20.0,
+                        color: Colors.black)),
+              ),
             ),
           ],
         ),
         background: Container(
-          color: Colors.green,
-          child: Text("Richtig"),
+          alignment: Alignment(-0.9, 0),
+          child: Icon(Icons.done, color: Colors.green, size: 80),
         ),
         secondaryBackground: Container(
-          color: Colors.red,
-          child: Text("Falsch"),
+          alignment: Alignment(0.9, 0),
+          child: Icon(Icons.clear, color: Colors.red, size: 80),
         ),
       ),
     );

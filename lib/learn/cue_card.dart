@@ -66,7 +66,7 @@ class _CueCardState extends State<CueCard> {
               style: TextStyle(fontSize: 40),
             ),
             Text(
-              "Der Vers",
+              "Du hast den Vers",
               style: TextStyle(fontSize: 20),
             ),
             Text(
@@ -74,12 +74,8 @@ class _CueCardState extends State<CueCard> {
               style: TextStyle(fontSize: 20),
             ),
             Text(
-              "war die letzen 10 Mal",
+              "oft genug richtig gewusst.",
               style: TextStyle(fontSize: 20),
-            ),
-            Text(
-              "Richtig!",
-              style: TextStyle(fontSize: 30),
             ),
             Container(
               height: 40,
