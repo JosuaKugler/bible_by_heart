@@ -80,13 +80,13 @@ class _FlipCueCardState extends State<FlipCueCard>
                             } else {
                               await widget.continueCurrentVerse();
                               setState(() {
-                                _animationStatus = AnimationStatus.completed;
+                                _animationController.reset();
                               });
                             }
                           } else {
                             await widget.currentVerseWrong();
                             setState(() {
-                              _animationStatus = AnimationStatus.completed;
+                              _animationController.reset();
                             });
                           }
                         },
