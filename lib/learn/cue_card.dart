@@ -69,8 +69,7 @@ class _CueCardState extends State<CueCard> {
               "Du hast den Vers",
               style: TextStyle(fontSize: 20),
             ),
-            Text(
-              '${short2long[verse.book]} ${verse.chapter}, ${verse.verse}',
+            Text(verse.passageString(),
               style: TextStyle(fontSize: 20),
             ),
             Text(

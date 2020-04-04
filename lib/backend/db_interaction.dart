@@ -323,6 +323,9 @@ class Verse {
     return Passage(this.book, this.chapter, this.verse);
   }
 
+  String passageString() {
+    return '${short2long[book]} $chapter, $verse';
+  }
   @override
   String toString() {
     return 'Verse{id: $id, book: $book, chapter: $chapter, verse: $verse, text: $text, learnStatus $learnStatus}, correct $correct, maxCorrect $maxCorrect';

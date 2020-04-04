@@ -74,13 +74,15 @@ class _SelectedListState extends State<SelectedList> {
                       context,
                       MaterialPageRoute(
                           builder: (context) => SelectPassage()));
-                  int newVerseId =
-                      await helper.getIdFromPassage(newVerse);
-                  helper.setLearnStatus(newVerseId, LearnStatus.selected);
-                  setState(() {
-                    selectedVerses = helper
-                        .getVersesOnLearnStatus(LearnStatus.selected);
-                  });
+                  if (newVerse != null) {
+                    int newVerseId =
+                    await helper.getIdFromPassage(newVerse);
+                    helper.setLearnStatus(newVerseId, LearnStatus.selected);
+                    setState(() {
+                      selectedVerses = helper
+                          .getVersesOnLearnStatus(LearnStatus.selected);
+                    });
+                  }
                 },
               ),
               body: (snapshot.data.length > 0)
@@ -115,8 +117,7 @@ class _SelectedListState extends State<SelectedList> {
                             alignment: Alignment(-0.8, 0.0),
                           ),
                           child: ListTile(
-                            title: Text(
-                                '${snapshot.data[index].book} ${snapshot.data[index].chapter}, ${snapshot.data[index].verse}'),
+                            title: Text(snapshot.data[index].passageString()),
                             subtitle: Text('${snapshot.data[index].text}'),
                           ),
                         );

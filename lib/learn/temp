@@ -11,8 +11,7 @@ else if (front) {
           child: Container(
             color: Colors.lightGreenAccent,
             child: Center(
-              child: Text(
-                  '${short2long[verse.book]} ${verse.chapter}, ${verse.verse}'),
+              child: Text(verse.passageString(),
             ),
           ),
         ),

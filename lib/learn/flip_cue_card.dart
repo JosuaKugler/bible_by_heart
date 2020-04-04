@@ -107,8 +107,7 @@ class FrontSide extends StatelessWidget {
         Center(
           child: Padding(
             padding: const EdgeInsets.all(20.0),
-            child: Text(
-                '${short2long[verse.book]} ${verse.chapter}, ${verse.verse}',
+            child: Text(verse.passageString(),
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 30.0,
@@ -151,11 +150,15 @@ class BackSide extends StatelessWidget {
             Center(
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
-                child: Text('${verse.text}',
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20.0,
-                        color: Colors.black)),
+                child: Row(
+                  children: [
+                    Text('${verse.text}',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20.0,
+                          color: Colors.black)),
+                ]
+                ),
               ),
             ),
           ],

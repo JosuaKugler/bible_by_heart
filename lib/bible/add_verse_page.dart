@@ -39,8 +39,7 @@ class _AddVersePageState extends State<AddVersePage> {
                 shrinkWrap: true,
                 children: <Widget>[
                   Container(height: 10,),
-                  Text(
-                    "${short2long[widget.verse.book]} ${widget.verse.chapter}, ${widget.verse.verse}",
+                  Text(widget.verse.passageString(),
                     style: TextStyle(fontSize: 20),
                     textAlign: TextAlign.center,
                   ),

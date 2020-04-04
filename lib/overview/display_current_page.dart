@@ -72,13 +72,15 @@ class _CurrentListState extends State<CurrentList> {
                       context,
                       MaterialPageRoute(
                           builder: (context) => SelectPassage()));
-                  int newVerseId =
-                      await helper.getIdFromPassage(newVerse);
-                  helper.setLearnStatus(newVerseId, LearnStatus.current);
-                  setState(() {
-                    currentVerses = helper
-                        .getVersesOnLearnStatus(LearnStatus.current);
-                  });
+                  if (newVerse != null) {
+                    int newVerseId =
+                    await helper.getIdFromPassage(newVerse);
+                    helper.setLearnStatus(newVerseId, LearnStatus.current);
+                    setState(() {
+                      currentVerses = helper
+                          .getVersesOnLearnStatus(LearnStatus.current);
+                    });
+                  }
                 },
               ),
               body: (snapshot.data.length > 0)
@@ -114,8 +116,7 @@ class _CurrentListState extends State<CurrentList> {
                             alignment: Alignment(-0.8, 0.0),
                           ),
                           child: ListTile(
-                            title: Text(
-                                '${snapshot.data[index].book} ${snapshot.data[index].chapter}, ${snapshot.data[index].verse}'),
+                            title: Text(snapshot.data[index].passageString()),
                             subtitle: Text(
                                 '${snapshot.data[index].text}, ${snapshot.data[index].correct} out of ${snapshot.data[index].maxCorrect}'),
                           ),

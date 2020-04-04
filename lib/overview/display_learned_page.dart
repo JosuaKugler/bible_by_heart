@@ -83,8 +83,7 @@ class LearnedList extends StatelessWidget {
                           alignment: Alignment(-0.8, 0.0),
                         ),
                         child: ListTile(
-                          title: Text(
-                              '${snapshot.data[index].book} ${snapshot.data[index].chapter}, ${snapshot.data[index].verse}'),
+                          title: Text(snapshot.data[index].passageString()),
                           subtitle: Text('${snapshot.data[index].text}'),
                         ),
                       );

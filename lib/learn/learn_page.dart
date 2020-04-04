@@ -155,11 +155,13 @@ class _LearnPageState extends State<LearnPage> {
                     context,
                     MaterialPageRoute(
                         builder: (context) => SelectPassage()));
-                int newVerseId = await helper.getIdFromPassage(newVerse);
-                helper.setLearnStatus(newVerseId, LearnStatus.current);
-                setState(() {
-                  currentVersesShuffle = getCurrentVersesShuffle();
-                });
+                if (newVerse != null) {
+                  int newVerseId = await helper.getIdFromPassage(newVerse);
+                  helper.setLearnStatus(newVerseId, LearnStatus.current);
+                  setState(() {
+                    currentVersesShuffle = getCurrentVersesShuffle();
+                  });
+                }
               },
             ),
           );
