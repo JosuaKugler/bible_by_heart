@@ -50,12 +50,12 @@ class _SelectPassageState extends State<SelectPassage>
     }).toList();
   }
 
-  List<ListTile> generateChapterList(String book, BuildContext context) {
+  List<InkWell> generateChapterList(String book, BuildContext context) {
     int chapterNumber = chapterNumbers[book];
     List<int> chapterList = [for(var i=1; i < chapterNumber + 1; i++) i];
     return chapterList.map((int chapter) {
-      return ListTile(
-        title: Text('$chapter'),
+      return InkWell(
+        child: Center(child: Text('$chapter', style: TextStyle(fontSize: 20),)),
         onTap: () {
           this.setNewChapter(Passage(book, chapter, 1));
           Navigator.pop(context);
@@ -88,7 +88,8 @@ class _SelectPassageState extends State<SelectPassage>
         ListView(
           children: this.generateBookList(),
         ),
-        ListView(
+        GridView(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5),
           children: this.generateChapterList(this.book, context),
         )
       ]),

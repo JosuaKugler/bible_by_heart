@@ -150,15 +150,11 @@ class BackSide extends StatelessWidget {
             Center(
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
-                child: Row(
-                  children: [
-                    Text('${verse.text}',
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20.0,
-                          color: Colors.black)),
-                ]
-                ),
+                child: Text('${verse.text}',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20.0,
+                      color: Colors.black)),
               ),
             ),
           ],
