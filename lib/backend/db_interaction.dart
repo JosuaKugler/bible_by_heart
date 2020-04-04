@@ -28,10 +28,11 @@ int learnStatusToInt(LearnStatus learnStatus) {
   }
 }
 
+DataBaseHelper helper = DataBaseHelper();
+
 class DataBaseHelper {
   Future<Database> db;
   bool initialized = false;
-  DataBaseHelper();
 
   Future<void> initialize() async {
     // Construct a file path to copy database to

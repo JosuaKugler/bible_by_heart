@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import '../backend/db_interaction.dart';
 
 class SelectPassage extends StatefulWidget {
-  final DataBaseHelper helper;
-  SelectPassage(this.helper);
   @override
   _SelectPassageState createState() => _SelectPassageState();
 }
@@ -65,7 +63,7 @@ class _SelectPassageState extends State<SelectPassage>
   }
 
   Future<List<ListTile>> generateVerseList(String book, int chapter, BuildContext context) async {
-    int verseNumber = await widget.helper.getNumberOfVerses(book, chapter);
+    int verseNumber = await helper.getNumberOfVerses(book, chapter);
     List<int> verseList = [for(var i=1; i < verseNumber + 1; i++) i];
     return verseList.map((int verse) {
       return ListTile(

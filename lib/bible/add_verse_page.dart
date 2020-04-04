@@ -5,11 +5,10 @@ import 'package:flutter/widgets.dart';
 import '../backend/db_interaction.dart';
 
 class AddVersePage extends StatefulWidget {
-  final DataBaseHelper helper;
   final Verse verse;
   final Future<LearnStatus> oldLearnStatus;
   final Function _onItemTapped;
-  AddVersePage(this.helper, this.verse, this._onItemTapped) : oldLearnStatus = helper.getLearnStatus(verse.id);
+  AddVersePage(this.verse, this._onItemTapped) : oldLearnStatus = helper.getLearnStatus(verse.id);
   @override
   _AddVersePageState createState() => _AddVersePageState();
 }
@@ -19,11 +18,11 @@ class _AddVersePageState extends State<AddVersePage> {
   @override
   void initState() {
     super.initState();
-    learnStatus = widget.helper.getLearnStatus(widget.verse.id);
+    learnStatus = helper.getLearnStatus(widget.verse.id);
   }
 
   Future<LearnStatus> changeLearnStatus(int id, LearnStatus newLearnStatus) async {
-    widget.helper.setLearnStatus(id, newLearnStatus);
+    helper.setLearnStatus(id, newLearnStatus);
     return newLearnStatus;
   }
 

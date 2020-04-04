@@ -40,8 +40,6 @@ class DisplayLearned extends StatelessWidget {
 }
 
 class LearnedList extends StatelessWidget {
-  final DataBaseHelper helper;
-  LearnedList(this.helper);
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(

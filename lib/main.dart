@@ -11,31 +11,23 @@ void main() => runApp(MyApp());
 
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
-  final DataBaseHelper helper;
-  MyApp() : helper = DataBaseHelper();
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Bibel lernen',
-      home: Home(this.helper),
+      home: Home(),
     );
   }
 }
 
 
 class Home extends StatefulWidget {
-  final helper;
   @override
-  Home(this.helper);
-  _HomeState createState() => _HomeState(this.helper);
+  _HomeState createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> {
   int _selectedIndex = 1;
-  final helper;
-  _HomeState(this.helper);
 
   void _onItemTapped(int index) {
     setState(() {
@@ -46,9 +38,9 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     final _pages = <Widget>[
-      OverviewPage(this.helper, this._onItemTapped),
-      LearnPage(this.helper, this._onItemTapped),
-      BiblePage(this.helper, this._onItemTapped),
+      OverviewPage(this._onItemTapped),
+      LearnPage(this._onItemTapped),
+      BiblePage(this._onItemTapped),
     ];
     return Scaffold(
       body: _pages[_selectedIndex],

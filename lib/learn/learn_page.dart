@@ -6,9 +6,8 @@ import 'cue_card.dart';
 import 'select_verse_page.dart';
 
 class LearnPage extends StatefulWidget {
-  final DataBaseHelper helper;
   final Function _onItemTapped;
-  LearnPage(this.helper, this._onItemTapped);
+  LearnPage(this._onItemTapped);
   @override
   _LearnPageState createState() => _LearnPageState();
 }
@@ -24,7 +23,7 @@ class _LearnPageState extends State<LearnPage> {
 
   Future<List<Verse>> getCurrentVersesShuffle() async {
     Future<List<Verse>> currentVerses =
-        widget.helper.getVersesOnLearnStatus(LearnStatus.current);
+        helper.getVersesOnLearnStatus(LearnStatus.current);
     SharedPreferences preferences = await SharedPreferences.getInstance();
     List<String> shuffleFromPreferences =
         preferences.getStringList("shuffledList") ?? null;
@@ -36,7 +35,7 @@ class _LearnPageState extends State<LearnPage> {
     } else {
       List<Verse> fromPrefs = [];
       for (String idString in shuffleFromPreferences) {
-        Verse verse = await widget.helper.getVerseFromId(int.parse(idString));
+        Verse verse = await helper.getVerseFromId(int.parse(idString));
         fromPrefs.add(verse);
       }
       //match fromPrefs with currentVerses.
@@ -74,8 +73,8 @@ class _LearnPageState extends State<LearnPage> {
       currentVersesShuffle =
           currentVersesShuffle.then((List<Verse> presentCVS) {
         Verse localCurrentVerse = presentCVS.removeLast();
-        widget.helper.setMaxCorrect(localCurrentVerse.id, newMaxCorrect);
-        widget.helper.setCorrect(localCurrentVerse.id, 0);
+        helper.setMaxCorrect(localCurrentVerse.id, newMaxCorrect);
+        helper.setCorrect(localCurrentVerse.id, 0);
         presentCVS.insert(0, localCurrentVerse);
         return presentCVS;
       });
@@ -85,9 +84,9 @@ class _LearnPageState extends State<LearnPage> {
   //call when the current Verse was correct
   Future<bool> currentVerseLearned() async {
     Verse verse = await currentVersesShuffle.then((list) => list.last);
-    await widget.helper.increaseCorrect(verse.id);
-    int correct = await widget.helper.getCorrect(verse.id);
-    int maxCorrect = await widget.helper.getMaxCorrect(verse.id);
+    await helper.increaseCorrect(verse.id);
+    int correct = await helper.getCorrect(verse.id);
+    int maxCorrect = await helper.getMaxCorrect(verse.id);
     bool maxCorrectReached = correct >= maxCorrect;
     return maxCorrectReached;
   }
@@ -95,10 +94,10 @@ class _LearnPageState extends State<LearnPage> {
   //call when the current Verse has reached LearnStatus.learned
   void finishCurrentVerse() async {
     Verse verse = await currentVersesShuffle.then((list) => list.last);
-    widget.helper.setLearnStatus(verse.id, LearnStatus.learned);
-    widget.helper.setMaxCorrect(
+    helper.setLearnStatus(verse.id, LearnStatus.learned);
+    helper.setMaxCorrect(
         verse.id, 10); // probably add different defaultMaxCorrect
-    widget.helper.setCorrect(verse.id, 0);
+    helper.setCorrect(verse.id, 0);
     setState(() {
       currentVersesShuffle =
           currentVersesShuffle.then((List<Verse> presentCVS) {
@@ -111,7 +110,7 @@ class _LearnPageState extends State<LearnPage> {
   //call when current Verse was wrong
   void currentVerseWrong() async {
     Verse verse = await currentVersesShuffle.then((list) => list.last);
-    await widget.helper.decreaseCorrect(verse.id, 2); //probably change default
+    await helper.decreaseCorrect(verse.id, 2); //probably change default
     await this.continueCurrentVerse();
   }
 
@@ -155,9 +154,9 @@ class _LearnPageState extends State<LearnPage> {
                 Passage newVerse = await Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => SelectPassage(widget.helper)));
-                int newVerseId = await widget.helper.getIdFromPassage(newVerse);
-                widget.helper.setLearnStatus(newVerseId, LearnStatus.current);
+                        builder: (context) => SelectPassage()));
+                int newVerseId = await helper.getIdFromPassage(newVerse);
+                helper.setLearnStatus(newVerseId, LearnStatus.current);
                 setState(() {
                   currentVersesShuffle = getCurrentVersesShuffle();
                 });

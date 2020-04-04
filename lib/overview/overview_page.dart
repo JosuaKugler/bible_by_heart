@@ -7,9 +7,8 @@ import 'display_learned_page.dart';
 import 'display_today_page.dart';
 
 class OverviewPage extends StatelessWidget {
-  final DataBaseHelper helper;
   final Function _onItemTapped;
-  OverviewPage(this.helper, this._onItemTapped);
+  OverviewPage(this._onItemTapped);
 
   Future<List<int>> getData() async {
     final selected = await helper.getVersesOnLearnStatus(LearnStatus.selected);
@@ -39,7 +38,7 @@ class OverviewPage extends StatelessWidget {
                     onTap: () {
                       Navigator.push(context,
                       MaterialPageRoute(
-                        builder: (context) => SelectedList(this.helper),
+                        builder: (context) => SelectedList(),
                       ));
                     },//show selected Verses in dismissible listView
                     child: DisplaySelected(snapshot.data),
@@ -48,7 +47,7 @@ class OverviewPage extends StatelessWidget {
                   onTap: () {
                     Navigator.push(context,
                         MaterialPageRoute(
-                          builder: (context) => CurrentList(this.helper),
+                          builder: (context) => CurrentList(),
                         ));
                   }, //show current Verses in dismissible listView (with stats for each verse?)
                   child: DisplayCurrent(snapshot.data),
@@ -57,7 +56,7 @@ class OverviewPage extends StatelessWidget {
                   onTap: () {
                     Navigator.push(context,
                         MaterialPageRoute(
-                          builder: (context) => LearnedList(this.helper),
+                          builder: (context) => LearnedList(),
                         ));
                   }, //show learned Verses in listView (with stats for each verse?)
                   child: DisplayLearned(snapshot.data),

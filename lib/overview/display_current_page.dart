@@ -41,9 +41,6 @@ class DisplayCurrent extends StatelessWidget {
 }
 
 class CurrentList extends StatefulWidget {
-  final DataBaseHelper helper;
-  CurrentList(this.helper);
-
   @override
   _CurrentListState createState() => _CurrentListState();
 }
@@ -54,7 +51,7 @@ class _CurrentListState extends State<CurrentList> {
   @override
   void initState() {
     super.initState();
-    currentVerses = widget.helper.getVersesOnLearnStatus(LearnStatus.current);
+    currentVerses = helper.getVersesOnLearnStatus(LearnStatus.current);
   }
 
   @override
@@ -74,12 +71,12 @@ class _CurrentListState extends State<CurrentList> {
                   Passage newVerse = await Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => SelectPassage(widget.helper)));
+                          builder: (context) => SelectPassage()));
                   int newVerseId =
-                      await widget.helper.getIdFromPassage(newVerse);
-                  widget.helper.setLearnStatus(newVerseId, LearnStatus.current);
+                      await helper.getIdFromPassage(newVerse);
+                  helper.setLearnStatus(newVerseId, LearnStatus.current);
                   setState(() {
-                    currentVerses = widget.helper
+                    currentVerses = helper
                         .getVersesOnLearnStatus(LearnStatus.current);
                   });
                 },
@@ -91,10 +88,10 @@ class _CurrentListState extends State<CurrentList> {
                         return Dismissible(
                           onDismissed: (DismissDirection direction) async {
                             if (direction == DismissDirection.endToStart) {
-                              await widget.helper.setLearnStatus(
+                              await helper.setLearnStatus(
                                   snapshot.data[index].id, LearnStatus.none);
                             } else {
-                              await widget.helper.setLearnStatus(
+                              await helper.setLearnStatus(
                                   snapshot.data[index].id,
                                   LearnStatus.selected);
                             }

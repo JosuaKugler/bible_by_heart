@@ -3,22 +3,20 @@ import 'package:flutter/material.dart';
 import '../backend/db_interaction.dart';
 
 class SelectPassage extends StatefulWidget {
-  final DataBaseHelper helper;
   final Passage displayPassage;
   final Function setNewChapter;
-  SelectPassage(this.helper, this.setNewChapter, this.displayPassage);
+  SelectPassage(this.setNewChapter, this.displayPassage);
   @override
   _SelectPassageState createState() =>
-      _SelectPassageState(this.helper, this.setNewChapter, this.displayPassage);
+      _SelectPassageState(this.setNewChapter, this.displayPassage);
 }
 
 class _SelectPassageState extends State<SelectPassage>
     with SingleTickerProviderStateMixin {
-  final DataBaseHelper helper;
   final Function setNewChapter;
   final Passage displayPassage;
   var book;
-  _SelectPassageState(this.helper, this.setNewChapter, this.displayPassage);
+  _SelectPassageState(this.setNewChapter, this.displayPassage);
 
   final List<Tab> myTabs = <Tab>[
     Tab(text: 'Buch'),

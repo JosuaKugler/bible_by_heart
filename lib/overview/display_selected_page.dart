@@ -43,9 +43,6 @@ class DisplaySelected extends StatelessWidget {
 }
 
 class SelectedList extends StatefulWidget {
-  final DataBaseHelper helper;
-  SelectedList(this.helper);
-
   @override
   _SelectedListState createState() => _SelectedListState();
 }
@@ -56,13 +53,13 @@ class _SelectedListState extends State<SelectedList> {
   @override
   void initState() {
     super.initState();
-    selectedVerses = widget.helper.getVersesOnLearnStatus(LearnStatus.selected);
+    selectedVerses = helper.getVersesOnLearnStatus(LearnStatus.selected);
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: widget.helper.getVersesOnLearnStatus(LearnStatus.selected),
+      future: helper.getVersesOnLearnStatus(LearnStatus.selected),
       builder: (context, AsyncSnapshot<List<Verse>> snapshot) {
         Widget result;
         if (snapshot.hasData) {
@@ -76,13 +73,12 @@ class _SelectedListState extends State<SelectedList> {
                   Passage newVerse = await Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => SelectPassage(widget.helper)));
+                          builder: (context) => SelectPassage()));
                   int newVerseId =
-                      await widget.helper.getIdFromPassage(newVerse);
-                  widget.helper
-                      .setLearnStatus(newVerseId, LearnStatus.selected);
+                      await helper.getIdFromPassage(newVerse);
+                  helper.setLearnStatus(newVerseId, LearnStatus.selected);
                   setState(() {
-                    selectedVerses = widget.helper
+                    selectedVerses = helper
                         .getVersesOnLearnStatus(LearnStatus.selected);
                   });
                 },
@@ -94,10 +90,10 @@ class _SelectedListState extends State<SelectedList> {
                         return Dismissible(
                           onDismissed: (DismissDirection direction) async {
                             if (direction == DismissDirection.endToStart) {
-                              await widget.helper.setLearnStatus(
+                              await helper.setLearnStatus(
                                   snapshot.data[index].id, LearnStatus.none);
                             } else {
-                              await widget.helper.setLearnStatus(
+                              await helper.setLearnStatus(
                                   snapshot.data[index].id, LearnStatus.current);
                             }
                           },

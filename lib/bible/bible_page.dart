@@ -7,17 +7,15 @@ import 'settings_page.dart';
 import 'add_verse_page.dart';
 
 class BiblePage extends StatefulWidget {
-  final helper;
   final Function _onItemTapped;
-  BiblePage(this.helper, this._onItemTapped);
+  BiblePage(this._onItemTapped);
 
   @override
-  _BiblePageState createState() => _BiblePageState(this.helper);
+  _BiblePageState createState() => _BiblePageState();
 }
 
 class _BiblePageState extends State<BiblePage> {
-  final DataBaseHelper helper;
-  _BiblePageState(this.helper);
+  _BiblePageState();
   ScrollController scrollController = ScrollController(initialScrollOffset: 0);
   Passage displayPassage = Passage("Gen", 1, 1);
   double offset = 0;
@@ -62,7 +60,7 @@ class _BiblePageState extends State<BiblePage> {
   }
 
   void incrementChapter() async {
-    Verse temp = await this.helper.getNextChapterVerse(displayPassage);
+    Verse temp = await helper.getNextChapterVerse(displayPassage);
     displayPassage = temp.toPassage();
     SharedPreferences preferences = await SharedPreferences.getInstance();
     preferences.setString("book", displayPassage.book);
@@ -76,7 +74,7 @@ class _BiblePageState extends State<BiblePage> {
   }
 
   void decrementChapter() async {
-    Verse temp = await this.helper.getPreviousChapterVerse(displayPassage);
+    Verse temp = await helper.getPreviousChapterVerse(displayPassage);
     displayPassage = temp.toPassage();
     SharedPreferences preferences = await SharedPreferences.getInstance();
     preferences.setString("book", displayPassage.book);
@@ -121,7 +119,7 @@ class _BiblePageState extends State<BiblePage> {
                 borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(20.0),
                     topRight: Radius.circular(20.0))),
-            builder: (context) => AddVersePage(widget.helper, verseList[i], widget._onItemTapped),
+            builder: (context) => AddVersePage(verseList[i], widget._onItemTapped),
           );
         },
         child: Text(
@@ -179,7 +177,6 @@ class _BiblePageState extends State<BiblePage> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => SelectPassage(
-                                  this.helper,
                                   this.setNewChapter,
                                   this.displayPassage,
                                   )));
