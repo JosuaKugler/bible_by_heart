@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../backend/db_interaction.dart';
+import 'flip_cue_card.dart';
 
 class CueCard extends StatefulWidget {
   final List<Verse> currentVersesShuffle;
@@ -29,7 +30,12 @@ class _CueCardState extends State<CueCard> {
   void initState() {
     super.initState();
     maxReached = false;
-    front = true;
+  }
+
+  void setMaxReachedState(bool value) {
+    setState(() {
+      maxReached = value;
+    });
   }
 
   void _learned(bool yes) {
@@ -114,75 +120,8 @@ class _CueCardState extends State<CueCard> {
           ],
         )),
       );
-    } else if (front) {
-      Verse verse = widget.currentVersesShuffle.last;
-      result = GestureDetector(
-        onTap: () {
-          setState(() {
-            front = false;
-          });
-        },
-        child: Container(
-          padding: EdgeInsets.all(20),
-          child: Container(
-            color: Colors.lightGreenAccent,
-            child: Center(
-              child: Text(
-                  '${short2long[verse.book]} ${verse.chapter}, ${verse.verse}'),
-            ),
-          ),
-        ),
-      );
     } else {
-      Verse verse = widget.currentVersesShuffle.last;
-      result = Container(
-        padding: EdgeInsets.all(20),
-        child: Dismissible(
-          key: UniqueKey(),
-          onDismissed: (DismissDirection direction) async {
-            if (direction == DismissDirection.startToEnd) {
-              bool localMaxReached = await widget.currentVerseLearned();
-              if (localMaxReached) {
-                setState(() {
-                  maxReached = true;
-                });
-              } else {
-                await widget.continueCurrentVerse();
-                setState(() {
-                  front = true;
-                });
-              }
-            } else {
-              await widget.currentVerseWrong();
-              setState(() {
-                front = true;
-              });
-            }
-          },
-          direction: DismissDirection.horizontal,
-          child: GestureDetector(
-            onTap: () {
-              setState(() {
-                front = true;
-              });
-            },
-            child: Container(
-              color: Colors.teal,
-              child: Center(
-                  child: Text('${verse.text}')
-              ),
-            ),
-          ),
-          background: Container(
-            color: Colors.green,
-            child: Text("Richtig"),
-          ),
-          secondaryBackground: Container(
-            color: Colors.red,
-            child: Text("Falsch"),
-          ),
-        ),
-      );
+      result = FlipCueCard(widget.currentVersesShuffle.last, widget.currentVerseLearned, this.setMaxReachedState, widget.continueCurrentVerse, widget.currentVerseWrong);
     }
     return result;
   }

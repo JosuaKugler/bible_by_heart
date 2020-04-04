@@ -1,0 +1,70 @@
+else if (front) {
+      Verse verse = widget.currentVersesShuffle.last;
+      result = GestureDetector(
+        onTap: () {
+          setState(() {
+            front = false;
+          });
+        },
+        child: Container(
+          padding: EdgeInsets.all(20),
+          child: Container(
+            color: Colors.lightGreenAccent,
+            child: Center(
+              child: Text(
+                  '${short2long[verse.book]} ${verse.chapter}, ${verse.verse}'),
+            ),
+          ),
+        ),
+      );
+    } else {
+      Verse verse = widget.currentVersesShuffle.last;
+      result = Container(
+        padding: EdgeInsets.all(20),
+        child: Dismissible(
+          key: UniqueKey(),
+          onDismissed: (DismissDirection direction) async {
+            if (direction == DismissDirection.startToEnd) {
+              bool localMaxReached = await widget.currentVerseLearned();
+              if (localMaxReached) {
+                setState(() {
+                  maxReached = true;
+                });
+              } else {
+                await widget.continueCurrentVerse();
+                setState(() {
+                  front = true;
+                });
+              }
+            } else {
+              await widget.currentVerseWrong();
+              setState(() {
+                front = true;
+              });
+            }
+          },
+          direction: DismissDirection.horizontal,
+          child: GestureDetector(
+            onTap: () {
+              setState(() {
+                front = true;
+              });
+            },
+            child: Container(
+              color: Colors.teal,
+              child: Center(
+                  child: Text('${verse.text}')
+              ),
+            ),
+          ),
+          background: Container(
+            color: Colors.green,
+            child: Text("Richtig"),
+          ),
+          secondaryBackground: Container(
+            color: Colors.red,
+            child: Text("Falsch"),
+          ),
+        ),
+      );>
+    }
