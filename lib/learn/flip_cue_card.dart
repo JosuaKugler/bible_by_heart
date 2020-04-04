@@ -35,6 +35,25 @@ class _FlipCueCardState extends State<FlipCueCard>
       });
   }
 
+  void superOnDismissed(DismissDirection direction) async {
+    if (direction == DismissDirection.startToEnd) {
+      bool localMaxReached = await widget.currentVerseLearned();
+      if (localMaxReached) {
+        widget.setMaxReachedState(true);
+      } else {
+        await widget.continueCurrentVerse();
+        setState(() {
+          _animationController.reset();
+        });
+      }
+    } else {
+      await widget.currentVerseWrong();
+      setState(() {
+        _animationController.reset();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -56,57 +75,88 @@ class _FlipCueCardState extends State<FlipCueCard>
             child: _animation.value <= 0.5
                 ? Container(
                     padding: EdgeInsets.all(20),
-                    child: Container(
-                      color: Colors.lightGreenAccent,
-                      child: Center(
-                        child: Text(
-                            '${short2long[widget.verse.book]} ${widget.verse.chapter}, ${widget.verse.verse}'),
-                      ),
-                    ),
+                    child: FrontSide(widget.verse),
                   )
-                : Transform(
-                    alignment: Alignment.center,
-                    transform: Matrix4.rotationX(pi),
-                    child: Container(
-                      padding: EdgeInsets.all(20),
-                      child: Dismissible(
-                        key: UniqueKey(),
-                        onDismissed: (DismissDirection direction) async {
-                          if (direction == DismissDirection.startToEnd) {
-                            bool localMaxReached =
-                                await widget.currentVerseLearned();
-                            if (localMaxReached) {
-                              widget.setMaxReachedState(true);
-                            } else {
-                              await widget.continueCurrentVerse();
-                              setState(() {
-                                _animationController.reset();
-                              });
-                            }
-                          } else {
-                            await widget.currentVerseWrong();
-                            setState(() {
-                              _animationController.reset();
-                            });
-                          }
-                        },
-                        direction: DismissDirection.horizontal,
-                        child: Container(
-                          color: Colors.teal,
-                          child: Center(child: Text('${widget.verse.text}')),
-                        ),
-                        background: Container(
-                          color: Colors.green,
-                          child: Text("Richtig"),
-                        ),
-                        secondaryBackground: Container(
-                          color: Colors.red,
-                          child: Text("Falsch"),
-                        ),
-                      ),
-                    ),
+                : Container(
+                    padding: EdgeInsets.all(20),
+                    child: BackSide(widget.verse, this.superOnDismissed),
                   ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class FrontSide extends StatelessWidget {
+  final Verse verse;
+  FrontSide(this.verse);
+  @override
+  Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
+    return Stack(
+      children: <Widget>[
+        Center(
+          child: new Image.asset(
+            'assets/karteikarte.png',
+            width: size.width,
+            height: size.height,
+            fit: BoxFit.fill,
+          ),
+        ),
+        Center(
+          child: Text(
+              '${short2long[verse.book]} ${verse.chapter}, ${verse.verse}',
+              style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 30.0,
+                  color: Colors.black)),
+        ),
+      ],
+    );
+  }
+}
+
+class BackSide extends StatelessWidget {
+  final Verse verse;
+  final Function superOnDismissed;
+  BackSide(this.verse, this.superOnDismissed);
+  @override
+  Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
+    return Transform(
+      alignment: Alignment.center,
+      transform: Matrix4.rotationX(pi),
+      child: Dismissible(
+        key: UniqueKey(),
+        onDismissed: superOnDismissed,
+        direction: DismissDirection.horizontal,
+        child: Stack(
+          children: <Widget>[
+            Center(
+              child: new Image.asset(
+                'assets/karteikarte.png',
+                width: size.width,
+                height: size.height,
+                fit: BoxFit.fill,
+              ),
+            ),
+            Center(
+              child: Text('${verse.text}',
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20.0,
+                      color: Colors.black)),
+            ),
+          ],
+        ),
+        background: Container(
+          color: Colors.green,
+          child: Text("Richtig"),
+        ),
+        secondaryBackground: Container(
+          color: Colors.red,
+          child: Text("Falsch"),
         ),
       ),
     );
