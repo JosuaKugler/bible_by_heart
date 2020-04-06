@@ -14,6 +14,7 @@ class LearnPage extends StatefulWidget {
 
 class _LearnPageState extends State<LearnPage> {
   Future<List<Verse>> currentVersesShuffle;
+  int shuffleCounter;
 
   @override
   void initState() {
@@ -21,12 +22,20 @@ class _LearnPageState extends State<LearnPage> {
     currentVersesShuffle = getCurrentVersesShuffle();
   }
 
+  void reloadVerses () {
+    setState(() {
+      currentVersesShuffle = getCurrentVersesShuffle();
+    });
+  }
+
   Future<List<Verse>> getCurrentVersesShuffle() async {
+    print("Hi from getCurrentVerseShuffle: $shuffleCounter");
     Future<List<Verse>> currentVerses =
         helper.getVersesOnLearnStatus(LearnStatus.current);
     SharedPreferences preferences = await SharedPreferences.getInstance();
     List<String> shuffleFromPreferences =
         preferences.getStringList("shuffledList") ?? null;
+    shuffleCounter = preferences.getInt("shuffleCounter") ?? 0;
     if (shuffleFromPreferences == null) {
       return await currentVerses.then((List<Verse> currentVerses) {
         currentVerses.shuffle();
@@ -51,6 +60,10 @@ class _LearnPageState extends State<LearnPage> {
             localCVS.add(verse);
           }
         }
+        if (shuffleCounter <= 0) {
+          localCVS.shuffle();
+          shuffleCounter = localCVS.length;
+        }
         return localCVS;
       });
     }
@@ -63,6 +76,11 @@ class _LearnPageState extends State<LearnPage> {
           currentVersesShuffle.then((List<Verse> presentCVS) {
         Verse localCurrentVerse = presentCVS.removeLast();
         presentCVS.insert(0, localCurrentVerse);
+        shuffleCounter--;
+        if (shuffleCounter <= 0) {
+          presentCVS.shuffle();
+          shuffleCounter = presentCVS.length;
+        }
         return presentCVS;
       });
     });
@@ -76,6 +94,11 @@ class _LearnPageState extends State<LearnPage> {
         helper.setMaxCorrect(localCurrentVerse.id, newMaxCorrect);
         helper.setCorrect(localCurrentVerse.id, 0);
         presentCVS.insert(0, localCurrentVerse);
+        shuffleCounter--;
+        if (shuffleCounter <= 0) {
+          presentCVS.shuffle();
+          shuffleCounter = presentCVS.length;
+        }
         return presentCVS;
       });
     });
@@ -102,8 +125,14 @@ class _LearnPageState extends State<LearnPage> {
       currentVersesShuffle =
           currentVersesShuffle.then((List<Verse> presentCVS) {
         presentCVS.removeLast();
+        shuffleCounter--;
+        if (shuffleCounter <= 0) {
+          presentCVS.shuffle();
+          shuffleCounter = presentCVS.length;
+        }
         return presentCVS;
       });
+
     });
   }
 
@@ -120,6 +149,7 @@ class _LearnPageState extends State<LearnPage> {
       List<String> presentCVSasString =
           presentCVS.map((Verse verse) => '${verse.id}').toList();
       preferences.setStringList("shuffledList", presentCVSasString);
+      preferences.setInt("shuffleCounter", shuffleCounter);
     });
   }
 
@@ -136,35 +166,15 @@ class _LearnPageState extends State<LearnPage> {
       builder: (context, AsyncSnapshot<List<Verse>> snapshot) {
         Widget result;
         if (snapshot.hasData) {
-          return Scaffold(
-            appBar: AppBar(
-              title: Text("Lernen"),
-            ),
-            body: CueCard(
+          return CueCard(
               snapshot.data,
+              this.reloadVerses,
               this.currentVerseLearned,
               this.currentVerseWrong,
               this.continueCurrentVerse,
               this.finishCurrentVerse,
               this.continueCurrentVerseAnyway,
-            ),
-            floatingActionButton: FloatingActionButton(
-              child: Icon(Icons.add),
-              onPressed: () async {
-                Passage newVerse = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => SelectPassage()));
-                if (newVerse != null) {
-                  int newVerseId = await helper.getIdFromPassage(newVerse);
-                  helper.setLearnStatus(newVerseId, LearnStatus.current);
-                  setState(() {
-                    currentVersesShuffle = getCurrentVersesShuffle();
-                  });
-                }
-              },
-            ),
-          );
+            );
         } else if (snapshot.hasError) {
           result = Text('${snapshot.error}');
         } else {

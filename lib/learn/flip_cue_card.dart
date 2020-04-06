@@ -17,21 +17,21 @@ class FlipCueCard extends StatefulWidget {
 
 class _FlipCueCardState extends State<FlipCueCard>
     with SingleTickerProviderStateMixin {
-  AnimationController _animationController;
+  AnimationController animationController;
   Animation _animation;
-  AnimationStatus _animationStatus = AnimationStatus.dismissed;
+  AnimationStatus animationStatus = AnimationStatus.dismissed;
 
   @override
   void initState() {
     super.initState();
-    _animationController =
+    animationController =
         AnimationController(vsync: this, duration: Duration(milliseconds: 1000));
-    _animation = Tween(end: 1.0, begin: 0.0).animate(_animationController)
+    _animation = Tween(end: 1.0, begin: 0.0).animate(animationController)
       ..addListener(() {
         setState(() {});
       })
       ..addStatusListener((status) {
-        _animationStatus = status;
+        animationStatus = status;
       });
   }
 
@@ -43,13 +43,13 @@ class _FlipCueCardState extends State<FlipCueCard>
       } else {
         await widget.continueCurrentVerse();
         setState(() {
-          _animationController.reset();
+          animationController.reset();
         });
       }
     } else {
       await widget.currentVerseWrong();
       setState(() {
-        _animationController.reset();
+        animationController.reset();
       });
     }
   }
@@ -66,10 +66,10 @@ class _FlipCueCardState extends State<FlipCueCard>
             ..rotateX(pi * _animation.value),
           child: GestureDetector(
             onTap: () {
-              if (_animationStatus == AnimationStatus.dismissed) {
-                _animationController.forward();
+              if (animationStatus == AnimationStatus.dismissed) {
+                animationController.forward();
               } else {
-                _animationController.reverse();
+                animationController.reverse();
               }
             },
             child: _animation.value <= 0.5
