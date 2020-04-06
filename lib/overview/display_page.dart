@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import '../learn/select_verse_page.dart';
+import 'detail_page.dart';
 
 class Display extends StatelessWidget {
   final List<int> data;
@@ -127,9 +128,16 @@ class _CategoryListState extends State<CategoryList> {
                             color: Colors.green,
                             alignment: Alignment(-0.8, 0.0),
                           ),
-                          child: ListTile(
-                            title: Text(snapshot.data[index].passageString()),
-                            subtitle: Text('${snapshot.data[index].text}'),
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.push(context, MaterialPageRoute(
+                                builder: (context) => DetailPage(widget.rebuild, snapshot.data[index], widget.learnStatus)
+                              ));
+                            },
+                            child: ListTile(
+                              title: Text(snapshot.data[index].passageString()),
+                              subtitle: Text('${snapshot.data[index].text}'),
+                            ),
                           ),
                         );
                       })

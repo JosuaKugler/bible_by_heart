@@ -44,9 +44,9 @@ class _OverviewPageState extends State<OverviewPage> {
     LearnStatus.learned
   ];
   final List<List<String>> dismissMessage = [
-    ["Lernen", "Status löschen"],
-    ["Kann ich schon", "Status löschen"],
-    ["Nochmal Lernen", "Status löschen"]
+    ["Lernen", "Löschen"],
+    ["Kann ich schon", "Löschen"],
+    ["Nochmal Lernen", "Löschen"]
   ];
   final List<List<LearnStatus>> dismissStatus = [
     [LearnStatus.current, LearnStatus.none],
@@ -93,7 +93,7 @@ class _OverviewPageState extends State<OverviewPage> {
                     mainAxisSpacing: 40),
                 itemBuilder: (context, index) => GestureDetector(
                   onTap: () {
-                    Navigator.push(
+                    (index < 3) ? Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => CategoryList(
@@ -104,7 +104,7 @@ class _OverviewPageState extends State<OverviewPage> {
                             this.dismissStatus[index],
                             this.noVerses[index],
                           ),
-                        ));
+                        )) : widget._onItemTapped(2);
                   }, //show selected Verses in dismissible listView
                   child: Display(snapshot.data, displayText, index),
                 ),
