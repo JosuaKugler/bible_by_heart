@@ -125,7 +125,7 @@ class _BiblePageState extends State<BiblePage> {
     return superString;
   }
 
-  List<Widget> versesToWidget(List<Verse> verseList) {
+  List<Widget> versesToWidget(List<Verse> verseList, BuildContext scaffoldContext) {
     List<Widget> list = List.generate(verseList.length, (i) {
       return GestureDetector(
         onTap: () {
@@ -136,7 +136,7 @@ class _BiblePageState extends State<BiblePage> {
                 borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(20.0),
                     topRight: Radius.circular(20.0))),
-            builder: (context) => AddVersePage(verseList[i], widget._onItemTapped),
+            builder: (context) => AddVersePage(verseList[i], widget._onItemTapped, scaffoldContext),
           );
         },
         child: Text(
@@ -215,7 +215,7 @@ class _BiblePageState extends State<BiblePage> {
         controller: scrollController,
         itemCount: snapshot.data.length + 1,
         itemBuilder: (context, index) {
-          return versesToWidget(snapshot.data)[index];
+          return versesToWidget(snapshot.data, context)[index];
         },
       ),
       onNotification: (notification) {

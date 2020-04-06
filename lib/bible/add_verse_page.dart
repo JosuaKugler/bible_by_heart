@@ -8,7 +8,8 @@ class AddVersePage extends StatefulWidget {
   final Verse verse;
   final Future<LearnStatus> oldLearnStatus;
   final Function _onItemTapped;
-  AddVersePage(this.verse, this._onItemTapped) : oldLearnStatus = helper.getLearnStatus(verse.id);
+  BuildContext scaffoldContext;
+  AddVersePage(this.verse, this._onItemTapped, this.scaffoldContext) : oldLearnStatus = helper.getLearnStatus(verse.id);
   @override
   _AddVersePageState createState() => _AddVersePageState();
 }
@@ -46,17 +47,20 @@ class _AddVersePageState extends State<AddVersePage> {
                   RadioListTile<LearnStatus>(
                     value: LearnStatus.current,
                     groupValue: snapshot.data,
-                    onChanged: (LearnStatus learnStatus) {
+                    onChanged: (LearnStatus learnStatus) async {
+                      await createSnackBar("${widget.verse.passageString()} wurde zur aktuellen Lernsammlung hinzugefügt");
                       setState(() {
                         this.learnStatus = changeLearnStatus(widget.verse.id, learnStatus);
                       });
+
                     },
                     title: Text("Lernen"),
                   ),
                   RadioListTile<LearnStatus>(
                     value: LearnStatus.selected,
                     groupValue: snapshot.data,
-                    onChanged: (LearnStatus learnStatus) {
+                    onChanged: (LearnStatus learnStatus) async {
+                      await createSnackBar("${widget.verse.passageString()} wurde zum Lernen vorgemerkt");
                       setState(() {
                         this.learnStatus = changeLearnStatus(widget.verse.id, learnStatus);
                       });
@@ -66,16 +70,14 @@ class _AddVersePageState extends State<AddVersePage> {
                   RadioListTile<LearnStatus>(
                     value: LearnStatus.learned,
                     groupValue: snapshot.data,
-                    onChanged: (LearnStatus learnStatus) {
+                    onChanged: (LearnStatus learnStatus) async {
+                      await createSnackBar("${widget.verse.passageString()} wurde als bereits gelernt gekennzeichnet");
                       setState(() {
                         this.learnStatus = changeLearnStatus(widget.verse.id, learnStatus);
                       });
                     },
                     title: Text("Ich kann diesen Vers schon"),
                   ),
-
-
-
                   Divider(),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -107,5 +109,21 @@ class _AddVersePageState extends State<AddVersePage> {
         return result;
       },
     );
+  }
+
+  Future createSnackBar(String text) async {
+    Scaffold.of(widget.scaffoldContext).removeCurrentSnackBar();
+    LearnStatus oldLearnStatus = await widget.oldLearnStatus.then((value) => value);
+    Scaffold.of(widget.scaffoldContext).showSnackBar(SnackBar(
+      content: Text(text),
+      duration: Duration(seconds: 1),
+      action: SnackBarAction(
+        label: "Rückgängig",
+        onPressed: () {
+          print(oldLearnStatus);
+          helper.setLearnStatus(widget.verse.id, oldLearnStatus);
+        },
+      ),
+    ));
   }
 }
