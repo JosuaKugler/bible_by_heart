@@ -208,11 +208,19 @@ class BackSide extends StatelessWidget {
             Center(
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
-                child: Text('${verse.text}',
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20.0,
-                        color: Colors.black)),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Text('${verse.text}',
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20.0,
+                              color: Colors.black)),
+                      Text('${verse.passageString()}', style: TextStyle(fontSize: 15, color: Colors.grey),)
+                    ],
+                  ),
+                ),
               ),
             ),
           ],

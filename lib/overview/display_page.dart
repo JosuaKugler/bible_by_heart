@@ -1,36 +1,42 @@
+import 'package:bible_by_heart/backend/db_interaction.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import '../backend/db_interaction.dart';
+import 'package:flutter/painting.dart';
 import '../learn/select_verse_page.dart';
 
-class DisplayCurrent extends StatelessWidget {
+class Display extends StatelessWidget {
   final List<int> data;
-  DisplayCurrent(this.data);
+  final List<String> displayText;
+  final int index;
+  Display(this.data, this.displayText, this.index);
+
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(8),
-      color: Colors.teal[200],
+      color: Colors.teal[100 * (index + 1)],
+      constraints: BoxConstraints.expand(),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
               Text(
-                "${data[1]}",
+                "${data[index]}",
                 style: TextStyle(
-                    fontSize: "${data[1]}".length == 1
+                    fontSize: "${data[index]}".length == 1
                         ? 65
-                        : "${data[3]}".length < 3 ? 40 : 20),
+                        : "${data[index]}".length < 3 ? 40 : 20),
               ),
               Text(
-                "${data[1] == 1 ? "Vers" : "Verse"}",
+                "${data[index] == 1 ? "Vers" : "Verse"}",
                 style: TextStyle(fontSize: 20),
               ),
             ],
           ),
           Text(
-            "aktuell am Lernen",
+            displayText[index],
             textAlign: TextAlign.left,
             style: TextStyle(fontSize: 16),
           )
@@ -40,46 +46,52 @@ class DisplayCurrent extends StatelessWidget {
   }
 }
 
-class CurrentList extends StatefulWidget {
+class CategoryList extends StatefulWidget {
+  final Function rebuild;
+  final String appBarTitle;
+  final LearnStatus learnStatus;
+  final List<String> dismissMessage;
+  final List<LearnStatus> dismissStatus;
+  final String noVerses;
+  
+  CategoryList(this.rebuild, this.appBarTitle, this.learnStatus, this.dismissMessage, this.dismissStatus, this.noVerses);
   @override
-  _CurrentListState createState() => _CurrentListState();
+  _CategoryListState createState() => _CategoryListState();
 }
 
-class _CurrentListState extends State<CurrentList> {
-  Future<List<Verse>> currentVerses;
+class _CategoryListState extends State<CategoryList> {
+  Future<List<Verse>> categoryVerses;
 
   @override
   void initState() {
     super.initState();
-    currentVerses = helper.getVersesOnLearnStatus(LearnStatus.current);
+    categoryVerses = helper.getVersesOnLearnStatus(widget.learnStatus);
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: currentVerses,
+      future: helper.getVersesOnLearnStatus(widget.learnStatus),
       builder: (context, AsyncSnapshot<List<Verse>> snapshot) {
         Widget result;
         if (snapshot.hasData) {
           result = Scaffold(
               appBar: AppBar(
-                title: Text("Lernverse"),
+                title: Text(widget.appBarTitle),
               ),
               floatingActionButton: FloatingActionButton(
                 child: Icon(Icons.add),
                 onPressed: () async {
-                  Passage newVerse = await Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => SelectPassage()));
+                  Passage newVerse = await Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => SelectPassage()));
                   if (newVerse != null) {
-                    int newVerseId =
-                    await helper.getIdFromPassage(newVerse);
-                    helper.setLearnStatus(newVerseId, LearnStatus.current);
+                    int newVerseId = await helper.getIdFromPassage(newVerse);
+                    helper.setLearnStatus(newVerseId, widget.learnStatus);
                     setState(() {
-                      currentVerses = helper
-                          .getVersesOnLearnStatus(LearnStatus.current);
+                      categoryVerses =
+                          helper.getVersesOnLearnStatus(widget.learnStatus);
                     });
+                    widget.rebuild();
                   }
                 },
               ),
@@ -91,17 +103,17 @@ class _CurrentListState extends State<CurrentList> {
                           onDismissed: (DismissDirection direction) async {
                             if (direction == DismissDirection.endToStart) {
                               await helper.setLearnStatus(
-                                  snapshot.data[index].id, LearnStatus.none);
+                                  snapshot.data[index].id, widget.dismissStatus[1]);
                             } else {
                               await helper.setLearnStatus(
-                                  snapshot.data[index].id,
-                                  LearnStatus.selected);
+                                  snapshot.data[index].id, widget.dismissStatus[0]);
                             }
+                            widget.rebuild();
                           },
                           key: UniqueKey(),
                           secondaryBackground: Container(
                             child: Text(
-                              'Nicht lernen',
+                              widget.dismissMessage[1],
                               style: TextStyle(color: Colors.white),
                             ),
                             color: Colors.red,
@@ -109,7 +121,7 @@ class _CurrentListState extends State<CurrentList> {
                           ),
                           background: Container(
                             child: Text(
-                              'Vormerken',
+                              widget.dismissMessage[0],
                               style: TextStyle(color: Colors.white),
                             ),
                             color: Colors.green,
@@ -117,20 +129,19 @@ class _CurrentListState extends State<CurrentList> {
                           ),
                           child: ListTile(
                             title: Text(snapshot.data[index].passageString()),
-                            subtitle: Text(
-                                '${snapshot.data[index].text}, ${snapshot.data[index].correct} out of ${snapshot.data[index].maxCorrect}'),
+                            subtitle: Text('${snapshot.data[index].text}'),
                           ),
                         );
                       })
                   : Center(
-                      child: Text('Noch keine Verse'),
+                      child: Text(widget.noVerses),
                     ));
         } else if (snapshot.hasError) {
           result = Text('$snapshot.error');
         } else {
           result = Scaffold(
             appBar: AppBar(
-              title: Text("Lernverse"),
+              title: Text(widget.appBarTitle),
             ),
             body: Text("Laden..."),
           );
