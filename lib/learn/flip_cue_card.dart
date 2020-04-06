@@ -91,6 +91,11 @@ class _FlipCueCardState extends State<FlipCueCard>
                           superOnDismissed(DismissDirection.endToStart); //wrong
                         } : null,
                       ),
+                      Container(
+                        width: 2,
+                        height: 40,
+                        color: Colors.grey,
+                      ),
                     ],
                   ),
                 ),
