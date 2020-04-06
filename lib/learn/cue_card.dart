@@ -27,7 +27,6 @@ class CueCard extends StatefulWidget {
 
 class _CueCardState extends State<CueCard> {
   bool maxReached;
-  bool front;
 
   @override
   void initState() {
@@ -60,126 +59,107 @@ class _CueCardState extends State<CueCard> {
         body: Container(
           child: Center(child: Text('keine Lernverse')),
         ),
-        floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.add),
-          onPressed: () async {
-            Passage newVerse = await Navigator.push(context,
-                MaterialPageRoute(builder: (context) => SelectPassage()));
-            if (newVerse != null) {
-              int newVerseId = await helper.getIdFromPassage(newVerse);
-              helper.setLearnStatus(newVerseId, LearnStatus.current);
-              widget.reloadVerses();
-            }
-          },
-        ),
+        floatingActionButton: buildFloatingActionButton(context),
       );
     } else if (maxReached) {
       Verse verse = widget.currentVersesShuffle.last;
-      result = Scaffold(
-        appBar: AppBar(
-          title: Text('Lernen'),
-        ),
-        body: Container(
-          color: Colors.amber,
-          child: Center(
-              child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Text(
-                "Glückwunsch!",
-                style: TextStyle(fontSize: 40),
-              ),
-              Text(
-                "Du hast den Vers",
-                style: TextStyle(fontSize: 20),
-              ),
-              Text(
-                verse.passageString(),
-                style: TextStyle(fontSize: 20),
-              ),
-              Text(
-                "oft genug richtig gewusst.",
-                style: TextStyle(fontSize: 20),
-              ),
-              Container(
-                height: 40,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: <Widget>[
-                  IconButton(
-                    icon: Icon(Icons.replay),
-                    onPressed: () async {
-                      final int newMaxCorrect = await showDialog<int>(
-                        context: context,
-                        builder: (context) => NewMaxCorrectDialog(),
-                      );
-                      if (newMaxCorrect > 0) {
-                        await widget.continueCurrentVerseAnyway(newMaxCorrect);
-                        setState(() {
-                          maxReached = false;
-                          front = true;
-                        });
-                      }
-                    },
-                    tooltip: "Vers trotzdem weiterlernen",
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.arrow_forward),
-                    onPressed: () async {
-                      await widget.finishCurrentVerse();
-                      setState(() {
-                        maxReached = false;
-                        front = true;
-                      });
-                    },
-                    tooltip: 'Vers als gelernt markieren',
-                  )
-                ],
-              )
-            ],
-          )),
-        ),
-        floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.add),
-          onPressed: () async {
-            Passage newVerse = await Navigator.push(context,
-                MaterialPageRoute(builder: (context) => SelectPassage()));
-            if (newVerse != null) {
-              int newVerseId = await helper.getIdFromPassage(newVerse);
-              helper.setLearnStatus(newVerseId, LearnStatus.current);
-              widget.reloadVerses();
-            }
-          },
-        ),
-      );
+      result = buildMaxReachedScaffold(verse, context);
     } else {
-      result = Scaffold(
-        appBar: AppBar(
-          title: Text("Lernen"),
-        ),
-        body: FlipCueCard(
+      result = FlipCueCard(
             widget.currentVersesShuffle.last,
             widget.currentVerseLearned,
             this.setMaxReachedState,
             widget.continueCurrentVerse,
-            widget.currentVerseWrong),
-        floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.add),
-          onPressed: () async {
-            Passage newVerse = await Navigator.push(context,
-                MaterialPageRoute(builder: (context) => SelectPassage()));
-            if (newVerse != null) {
-              int newVerseId = await helper.getIdFromPassage(newVerse);
-              helper.setLearnStatus(newVerseId, LearnStatus.current);
-              widget.reloadVerses();
-            }
-          },
-        ),
+            widget.currentVerseWrong,
+            buildFloatingActionButton
       );
     }
     return result;
   }
+
+  Scaffold buildMaxReachedScaffold(Verse verse, BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Lernen'),
+      ),
+      body: Container(
+        color: Colors.amber,
+        child: Center(
+            child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Text(
+              "Glückwunsch!",
+              style: TextStyle(fontSize: 40),
+            ),
+            Text(
+              "Du hast den Vers",
+              style: TextStyle(fontSize: 20),
+            ),
+            Text(
+              verse.passageString(),
+              style: TextStyle(fontSize: 20),
+            ),
+            Text(
+              "oft genug richtig gewusst.",
+              style: TextStyle(fontSize: 20),
+            ),
+            Container(
+              height: 40,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                IconButton(
+                  icon: Icon(Icons.replay),
+                  onPressed: () async {
+                    final int newMaxCorrect = await showDialog<int>(
+                      context: context,
+                      builder: (context) => NewMaxCorrectDialog(),
+                    );
+                    if (newMaxCorrect > 0) {
+                      await widget.continueCurrentVerseAnyway(newMaxCorrect);
+                      setState(() {
+                        maxReached = false;
+                      });
+                    }
+                  },
+                  tooltip: "Vers trotzdem weiterlernen",
+                ),
+                IconButton(
+                  icon: Icon(Icons.arrow_forward),
+                  onPressed: () async {
+                    await widget.finishCurrentVerse();
+                    setState(() {
+                      maxReached = false;
+                    });
+                  },
+                  tooltip: 'Vers als gelernt markieren',
+                )
+              ],
+            )
+          ],
+        )),
+      ),
+      floatingActionButton: buildFloatingActionButton(context),
+    );
+  }
+
+  FloatingActionButton buildFloatingActionButton(BuildContext context) {
+    return FloatingActionButton(
+      child: Icon(Icons.add),
+      onPressed: () async {
+        Passage newVerse = await Navigator.push(context,
+            MaterialPageRoute(builder: (context) => SelectPassage()));
+        if (newVerse != null) {
+          int newVerseId = await helper.getIdFromPassage(newVerse);
+          helper.setLearnStatus(newVerseId, LearnStatus.current);
+          widget.reloadVerses();
+        }
+      },
+    );
+  }
+
 }
 
 class NewMaxCorrectDialog extends StatefulWidget {

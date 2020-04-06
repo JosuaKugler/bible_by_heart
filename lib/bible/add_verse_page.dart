@@ -44,17 +44,14 @@ class _AddVersePageState extends State<AddVersePage> {
                     textAlign: TextAlign.center,
                   ),
                   RadioListTile<LearnStatus>(
-                    value: LearnStatus.none,
+                    value: LearnStatus.current,
                     groupValue: snapshot.data,
                     onChanged: (LearnStatus learnStatus) {
                       setState(() {
                         this.learnStatus = changeLearnStatus(widget.verse.id, learnStatus);
                       });
                     },
-                    title: Text("Nicht auswählen"),
-                    subtitle: snapshot.data == LearnStatus.none
-                        ? Text("Vers ist überhaupt nicht ausgewählt")
-                        : Text("Vers ist ausgewählt"),
+                    title: Text("Lernen"),
                   ),
                   RadioListTile<LearnStatus>(
                     value: LearnStatus.selected,
@@ -65,23 +62,6 @@ class _AddVersePageState extends State<AddVersePage> {
                       });
                     },
                     title: Text("Vormerken"),
-                    subtitle: snapshot.data == LearnStatus.selected
-                        ? Text("Vers ist zum Lernen vorgemerkt")
-                        : Text("Vers ist noch nicht vorgemerkt"),
-                  ),
-                  RadioListTile<LearnStatus>(
-                    value: LearnStatus.current,
-                    groupValue: snapshot.data,
-                    onChanged: (LearnStatus learnStatus) {
-                      setState(() {
-                        this.learnStatus = changeLearnStatus(widget.verse.id, learnStatus);
-                      });
-                    },
-                    title: Text("Lernen"),
-                    subtitle: snapshot.data == LearnStatus.current
-                        ? Text("Vers ist in aktueller Lernsammlung enthalten")
-                        : Text(
-                            "Vers ist in aktueller Lernsammlung nicht enthalten"),
                   ),
                   RadioListTile<LearnStatus>(
                     value: LearnStatus.learned,
@@ -91,26 +71,11 @@ class _AddVersePageState extends State<AddVersePage> {
                         this.learnStatus = changeLearnStatus(widget.verse.id, learnStatus);
                       });
                     },
-                    title: Text("Bereits gelernt"),
-                    subtitle: snapshot.data == LearnStatus.learned
-                        ? Text("Du kannst diesen Vers bereits auswendig")
-                        : Text("Du kannst diesen Vers noch nicht auswendig"),
+                    title: Text("Ich kann diesen Vers schon"),
                   ),
-                  Divider(),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      FloatingActionButton.extended(
-                        label: Text("Vers in 'Lernen' ansehen",
-                          style: TextStyle(fontSize: 16, color: Colors.black),
-                        ),
-                        onPressed: () {
-                          Navigator.pop(context);
-                          widget._onItemTapped(1);
-                        },
-                      )
-                    ],
-                  ),
+
+
+
                   Divider(),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

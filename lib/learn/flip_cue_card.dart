@@ -9,8 +9,14 @@ class FlipCueCard extends StatefulWidget {
   final Function setMaxReachedState;
   final Function continueCurrentVerse;
   final Function currentVerseWrong;
-  FlipCueCard(this.verse, this.currentVerseLearned, this.setMaxReachedState,
-      this.continueCurrentVerse, this.currentVerseWrong);
+  final Function buildFloatingActionButton;
+  FlipCueCard(
+      this.verse,
+      this.currentVerseLearned,
+      this.setMaxReachedState,
+      this.continueCurrentVerse,
+      this.currentVerseWrong,
+      this.buildFloatingActionButton);
   @override
   _FlipCueCardState createState() => _FlipCueCardState();
 }
@@ -24,8 +30,8 @@ class _FlipCueCardState extends State<FlipCueCard>
   @override
   void initState() {
     super.initState();
-    animationController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 1000));
+    animationController = AnimationController(
+        vsync: this, duration: Duration(milliseconds: 1000));
     _animation = Tween(end: 1.0, begin: 0.0).animate(animationController)
       ..addListener(() {
         setState(() {});
@@ -56,34 +62,86 @@ class _FlipCueCardState extends State<FlipCueCard>
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Color.fromARGB(255, 27, 28, 30),
-      child: Center(
-        child: Transform(
-          alignment: FractionalOffset.center,
-          transform: Matrix4.identity()
-            ..setEntry(3, 2, 0.002)
-            ..rotateX(pi * _animation.value),
-          child: GestureDetector(
-            onTap: () {
-              if (animationStatus == AnimationStatus.dismissed) {
-                animationController.forward();
-              } else {
-                animationController.reverse();
-              }
-            },
-            child: _animation.value <= 0.5
-                ? Container(
-                    padding: EdgeInsets.all(20),
-                    child: FrontSide(widget.verse),
-                  )
-                : Container(
-                    padding: EdgeInsets.all(20),
-                    child: BackSide(widget.verse, this.superOnDismissed),
+    return Scaffold(
+      appBar: AppBar(
+          title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+            Text("Lernen"),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Opacity(
+                  opacity: animationController.value,
+                  child: Row(
+                    children: <Widget>[
+                      IconButton(
+                        icon: Icon(Icons.done),
+                        color: Color.fromARGB(255, 0, 255, 0),
+                        iconSize: 40,
+                        onPressed: (animationController.value == 1) ? () {
+                          superOnDismissed(DismissDirection.startToEnd); //correct
+                        } : null,
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.clear),
+                        iconSize: 40,
+                        color: Colors.red,
+                        onPressed: (animationController.value == 1) ? () {
+                          superOnDismissed(DismissDirection.endToStart); //wrong
+                        } : null,
+                      ),
+                    ],
                   ),
+                ),
+                (animationStatus != AnimationStatus.dismissed)
+                    ? IconButton(
+                        icon: Icon(Icons.sync),
+                        iconSize: 40,
+                        onPressed: () {
+                          animationController.reverse();
+                        },
+                      )
+                    : IconButton(
+                        icon: Icon(Icons.sync),
+                        iconSize: 40,
+                        onPressed: () {
+                          animationController.forward();
+                        },
+                      )
+              ],
+            ),
+          ])),
+      body: Container(
+        color: Color.fromARGB(255, 27, 28, 30),
+        child: Center(
+          child: Transform(
+            alignment: FractionalOffset.center,
+            transform: Matrix4.identity()
+              ..setEntry(3, 2, 0.002)
+              ..rotateX(pi * _animation.value),
+            child: GestureDetector(
+              onTap: () {
+                if (animationStatus == AnimationStatus.dismissed) {
+                  animationController.forward();
+                } else {
+                  animationController.reverse();
+                }
+              },
+              child: _animation.value <= 0.5
+                  ? Container(
+                      padding: EdgeInsets.all(0),
+                      child: FrontSide(widget.verse),
+                    )
+                  : Container(
+                      padding: EdgeInsets.all(0),
+                      child: BackSide(widget.verse, this.superOnDismissed),
+                    ),
+            ),
           ),
         ),
       ),
+      floatingActionButton: widget.buildFloatingActionButton(context),
     );
   }
 }
@@ -151,10 +209,10 @@ class BackSide extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Text('${verse.text}',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20.0,
-                      color: Colors.black)),
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20.0,
+                        color: Colors.black)),
               ),
             ),
           ],

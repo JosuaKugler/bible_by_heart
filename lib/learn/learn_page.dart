@@ -29,7 +29,7 @@ class _LearnPageState extends State<LearnPage> {
   }
 
   Future<List<Verse>> getCurrentVersesShuffle() async {
-    print("Hi from getCurrentVerseShuffle: $shuffleCounter");
+    //print("Hi from getCurrentVerseShuffle: $shuffleCounter");
     Future<List<Verse>> currentVerses =
         helper.getVersesOnLearnStatus(LearnStatus.current);
     SharedPreferences preferences = await SharedPreferences.getInstance();
