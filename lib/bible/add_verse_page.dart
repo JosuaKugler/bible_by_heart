@@ -7,9 +7,9 @@ import '../backend/db_interaction.dart';
 class AddVersePage extends StatefulWidget {
   final Verse verse;
   final Future<LearnStatus> oldLearnStatus;
-  final BuildContext scaffoldContext;
-  final bool showHeaderBool;
-  AddVersePage(this.verse, this.showHeaderBool, {this.scaffoldContext}) : oldLearnStatus = helper.getLearnStatus(verse.id);
+  final Function _onItemTapped;
+  BuildContext scaffoldContext;
+  AddVersePage(this.verse, this._onItemTapped, this.scaffoldContext) : oldLearnStatus = helper.getLearnStatus(verse.id);
   @override
   _AddVersePageState createState() => _AddVersePageState();
 }
@@ -39,8 +39,8 @@ class _AddVersePageState extends State<AddVersePage> {
                 scrollDirection: Axis.vertical,
                 shrinkWrap: true,
                 children: <Widget>[
-                  if (widget.showHeaderBool) Container(height: 10,),
-                  if (widget.showHeaderBool) Text(widget.verse.passageString(),
+                  Container(height: 10,),
+                  Text(widget.verse.passageString(),
                     style: TextStyle(fontSize: 20),
                     textAlign: TextAlign.center,
                   ),
@@ -48,7 +48,7 @@ class _AddVersePageState extends State<AddVersePage> {
                     value: LearnStatus.current,
                     groupValue: snapshot.data,
                     onChanged: (LearnStatus learnStatus) async {
-                      await createSnackBar("${widget.verse.passageString()} wurde zur aktuellen Lernsammlung hinzugefügt", context);
+                      await createSnackBar("${widget.verse.passageString()} wurde zur aktuellen Lernsammlung hinzugefügt");
                       setState(() {
                         this.learnStatus = changeLearnStatus(widget.verse.id, learnStatus);
                       });
@@ -60,7 +60,7 @@ class _AddVersePageState extends State<AddVersePage> {
                     value: LearnStatus.selected,
                     groupValue: snapshot.data,
                     onChanged: (LearnStatus learnStatus) async {
-                      await createSnackBar("${widget.verse.passageString()} wurde zum Lernen vorgemerkt", context);
+                      await createSnackBar("${widget.verse.passageString()} wurde zum Lernen vorgemerkt");
                       setState(() {
                         this.learnStatus = changeLearnStatus(widget.verse.id, learnStatus);
                       });
@@ -71,7 +71,7 @@ class _AddVersePageState extends State<AddVersePage> {
                     value: LearnStatus.learned,
                     groupValue: snapshot.data,
                     onChanged: (LearnStatus learnStatus) async {
-                      await createSnackBar("${widget.verse.passageString()} wurde als bereits gelernt gekennzeichnet", context);
+                      await createSnackBar("${widget.verse.passageString()} wurde als bereits gelernt gekennzeichnet");
                       setState(() {
                         this.learnStatus = changeLearnStatus(widget.verse.id, learnStatus);
                       });
@@ -111,28 +111,17 @@ class _AddVersePageState extends State<AddVersePage> {
     );
   }
 
-  Future createSnackBar(String text, BuildContext context) async {
-    var thisContext;
-    if (widget.scaffoldContext == null) {
-      thisContext = context;
-    } else {
-      thisContext = widget.scaffoldContext;
-    }
-    Scaffold.of(thisContext).removeCurrentSnackBar();
+  Future createSnackBar(String text) async {
+    Scaffold.of(widget.scaffoldContext).removeCurrentSnackBar();
     LearnStatus oldLearnStatus = await widget.oldLearnStatus.then((value) => value);
-    Scaffold.of(thisContext).showSnackBar(SnackBar(
+    Scaffold.of(widget.scaffoldContext).showSnackBar(SnackBar(
       content: Text(text),
-      duration: Duration(seconds: 2),
+      duration: Duration(seconds: 1),
       action: SnackBarAction(
         label: "Rückgängig",
         onPressed: () {
+          print(oldLearnStatus);
           helper.setLearnStatus(widget.verse.id, oldLearnStatus);
-          if (widget.scaffoldContext == null) {//then you still are in the same context
-            setState(() {
-              Function temp = () async => oldLearnStatus; //trick to turn value into future
-              this.learnStatus = temp();
-            });
-          }
         },
       ),
     ));
