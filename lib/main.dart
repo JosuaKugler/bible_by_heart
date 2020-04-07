@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:async';
-import 'backend/db_interaction.dart';
-import 'overview/overview_page.dart';
-import 'learn/learn_page.dart';
+
 import 'bible/bible_page.dart';
+import 'learn/learn_page.dart';
+import 'overview/overview_page.dart';
 
 void main() => runApp(MyApp());
 

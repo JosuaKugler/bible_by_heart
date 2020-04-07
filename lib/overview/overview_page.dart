@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+
 import '../backend/db_interaction.dart';
 import 'display_page.dart';
 
@@ -66,7 +67,6 @@ class _OverviewPageState extends State<OverviewPage> {
   ];
 
   void rebuild() {
-    print("rebuild is called");
     setState(() {
       data = getData();
     });
@@ -103,6 +103,7 @@ class _OverviewPageState extends State<OverviewPage> {
                             this.dismissMessage[index],
                             this.dismissStatus[index],
                             this.noVerses[index],
+                            widget._onItemTapped,
                           ),
                         )) : widget._onItemTapped(2);
                   }, //show selected Verses in dismissible listView

@@ -136,7 +136,7 @@ class _BiblePageState extends State<BiblePage> {
                 borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(20.0),
                     topRight: Radius.circular(20.0))),
-            builder: (context) => AddVersePage(verseList[i], widget._onItemTapped, scaffoldContext),
+            builder: (context) => AddVersePage(verseList[i], scaffoldContext),
           );
         },
         child: Text(

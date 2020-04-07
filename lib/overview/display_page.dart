@@ -2,6 +2,7 @@ import 'package:bible_by_heart/backend/db_interaction.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
+
 import '../learn/select_verse_page.dart';
 import 'detail_page.dart';
 
@@ -54,8 +55,9 @@ class CategoryList extends StatefulWidget {
   final List<String> dismissMessage;
   final List<LearnStatus> dismissStatus;
   final String noVerses;
+  final Function _onItemTapped;
   
-  CategoryList(this.rebuild, this.appBarTitle, this.learnStatus, this.dismissMessage, this.dismissStatus, this.noVerses);
+  CategoryList(this.rebuild, this.appBarTitle, this.learnStatus, this.dismissMessage, this.dismissStatus, this.noVerses, this._onItemTapped);
   @override
   _CategoryListState createState() => _CategoryListState();
 }
@@ -131,7 +133,7 @@ class _CategoryListState extends State<CategoryList> {
                           child: GestureDetector(
                             onTap: () {
                               Navigator.push(context, MaterialPageRoute(
-                                builder: (context) => DetailPage(widget.rebuild, snapshot.data[index], widget.learnStatus)
+                                builder: (context) => DetailPage(widget.rebuild, snapshot.data[index], widget.learnStatus, widget._onItemTapped)
                               ));
                             },
                             child: ListTile(

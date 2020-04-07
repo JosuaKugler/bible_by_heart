@@ -1,9 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../backend/db_interaction.dart';
 import 'cue_card.dart';
-import 'select_verse_page.dart';
 
 class LearnPage extends StatefulWidget {
   final Function _onItemTapped;
@@ -29,7 +30,6 @@ class _LearnPageState extends State<LearnPage> {
   }
 
   Future<List<Verse>> getCurrentVersesShuffle() async {
-    //print("Hi from getCurrentVerseShuffle: $shuffleCounter");
     Future<List<Verse>> currentVerses =
         helper.getVersesOnLearnStatus(LearnStatus.current);
     SharedPreferences preferences = await SharedPreferences.getInstance();
@@ -51,19 +51,28 @@ class _LearnPageState extends State<LearnPage> {
       return await currentVerses.then((List<Verse> presentCurrentVerses) {
         List<Verse> localCVS = [];
         for (Verse verse in presentCurrentVerses) {
-          if (!fromPrefs.contains(verse)) {
-            fromPrefs.insert(0, verse);
+          bool add = true;
+          for (Verse verseFromPrefs in fromPrefs) {
+            if (verseFromPrefs.id == verse.id) add = false;
           }
+          if (add) fromPrefs.insert(0, verse);
         }
         for (Verse verse in fromPrefs) {
-          if (presentCurrentVerses.contains(verse)) {
-            localCVS.add(verse);
+          bool add = false;
+          for (Verse temp in presentCurrentVerses) {
+            if (temp.id == verse.id) add = true;
           }
+          if (add) localCVS.add(verse);
         }
         if (shuffleCounter <= 0) {
           localCVS.shuffle();
           shuffleCounter = localCVS.length;
         }
+        List<int> localCVSid = localCVS.fold([], (previousValue, element) {
+          previousValue.add(element.id);
+          return previousValue;
+        });
+        print(localCVSid);
         return localCVS;
       });
     }

@@ -1,15 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+
 import '../backend/db_interaction.dart';
 
 class AddVersePage extends StatefulWidget {
   final Verse verse;
   final Future<LearnStatus> oldLearnStatus;
-  final Function _onItemTapped;
-  BuildContext scaffoldContext;
-  AddVersePage(this.verse, this._onItemTapped, this.scaffoldContext) : oldLearnStatus = helper.getLearnStatus(verse.id);
+  final BuildContext scaffoldContext;
+  AddVersePage(this.verse, this.scaffoldContext) : oldLearnStatus = helper.getLearnStatus(verse.id);
   @override
   _AddVersePageState createState() => _AddVersePageState();
 }
