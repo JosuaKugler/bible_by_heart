@@ -7,24 +7,61 @@ import 'package:flutter/services.dart';
 
 //this file defines a interface for the dataBase, as well as the Verse and Passage class
 
-
 LearnStatus intToLearnStatus(int learnStatusInt) {
   switch (learnStatusInt) {
-    case 0:{ return LearnStatus.none;}break;
-    case 1:{ return LearnStatus.selected;}break;
-    case 2:{return LearnStatus.current;}break;
-    case 3:{return LearnStatus.learned;}break;
-    default:{return null;}
+    case 0:
+      {
+        return LearnStatus.none;
+      }
+      break;
+    case 1:
+      {
+        return LearnStatus.selected;
+      }
+      break;
+    case 2:
+      {
+        return LearnStatus.current;
+      }
+      break;
+    case 3:
+      {
+        return LearnStatus.learned;
+      }
+      break;
+    default:
+      {
+        return null;
+      }
   }
 }
 
 int learnStatusToInt(LearnStatus learnStatus) {
   switch (learnStatus) {
-    case LearnStatus.none:{return 0;}break;
-    case LearnStatus.selected:{return 1;}break;
-    case LearnStatus.current:{return 2;}break;
-    case LearnStatus.learned:{return 3;}break;
-    default:{return null;}
+    case LearnStatus.none:
+      {
+        return 0;
+      }
+      break;
+    case LearnStatus.selected:
+      {
+        return 1;
+      }
+      break;
+    case LearnStatus.current:
+      {
+        return 2;
+      }
+      break;
+    case LearnStatus.learned:
+      {
+        return 3;
+      }
+      break;
+    default:
+      {
+        return null;
+      }
   }
 }
 
@@ -65,7 +102,7 @@ class DataBaseHelper {
         chapter: maps[i]['chapter'],
         verse: maps[i]['verse'],
         text: maps[i]['text'],
-        learnStatus : intToLearnStatus(maps[i]['learnStatus']),
+        learnStatus: intToLearnStatus(maps[i]['learnStatus']),
         correct: maps[i]['correct'],
         maxCorrect: maps[i]['maxCorrect'],
       );
@@ -86,12 +123,24 @@ class DataBaseHelper {
         chapter: maps[i]['chapter'],
         verse: maps[i]['verse'],
         text: maps[i]['text'],
-        learnStatus : intToLearnStatus(maps[i]['learnStatus']),
+        learnStatus: intToLearnStatus(maps[i]['learnStatus']),
         correct: maps[i]['correct'],
         maxCorrect: maps[i]['maxCorrect'],
       );
     });
   }
+
+  /*
+  Future<List<String>> getAllBooksMatching(String searchTerm) async {
+    if (!this.initialized) await this.initialize();
+    final Database localDb = await this.db;
+    final List<Map<String, dynamic>> maps = await localDb.rawQuery(
+        "SELECT book FROM bible WHERE book LIKE '%$searchTerm%' AND chapter = 1 AND verse = 1");
+    List<String> retList =  maps.map((oneMap) => '${oneMap['book']}').toList();
+    //print(retList);
+    return retList;
+  }
+  */
 
   Future<Verse> getVerseFromId(int id) async {
     if (!this.initialized) await this.initialize();
@@ -105,7 +154,7 @@ class DataBaseHelper {
       chapter: resultVerseMap['chapter'],
       verse: resultVerseMap['verse'],
       text: resultVerseMap['text'],
-      learnStatus : intToLearnStatus(resultVerseMap['learnStatus']),
+      learnStatus: intToLearnStatus(resultVerseMap['learnStatus']),
       correct: resultVerseMap['correct'],
       maxCorrect: resultVerseMap['maxCorrect'],
     );
@@ -127,7 +176,7 @@ class DataBaseHelper {
       chapter: resultVerseMap['chapter'],
       verse: resultVerseMap['verse'],
       text: resultVerseMap['text'],
-      learnStatus : intToLearnStatus(resultVerseMap['learnStatus']),
+      learnStatus: intToLearnStatus(resultVerseMap['learnStatus']),
       correct: resultVerseMap['correct'],
       maxCorrect: resultVerseMap['maxCorrect'],
     );
@@ -169,7 +218,9 @@ class DataBaseHelper {
 
   //returns the first verse of the next chapter
   Future<Verse> getNextChapterVerse(Passage passage) async {
-    if (!this.initialized) {this.initialize();}
+    if (!this.initialized) {
+      this.initialize();
+    }
     final localDb = await this.db;
     final maps = await localDb.rawQuery(
         "SELECT * FROM bible WHERE book = '${passage.book}' AND chapter = ${passage.chapter}");
@@ -178,46 +229,51 @@ class DataBaseHelper {
   }
 
   Future<int> getNumberOfChapters(String book) async {
-    if (!this.initialized) {this.initialize();}
+    if (!this.initialized) {
+      this.initialize();
+    }
     final localDb = await this.db;
     final maps = await localDb.rawQuery(
-        "SELECT chapter FROM bible WHERE book = '$book' AND verse = 1"
-    );
+        "SELECT chapter FROM bible WHERE book = '$book' AND verse = 1");
     return maps.length;
   }
 
   Future<int> getNumberOfVerses(String book, int chapter) async {
-    if (!this.initialized) {this.initialize();}
+    if (!this.initialized) {
+      this.initialize();
+    }
     final localDb = await this.db;
     final maps = await localDb.rawQuery(
-        "SELECT verse FROM bible WHERE book = '$book' AND chapter = '$chapter'"
-    );
+        "SELECT verse FROM bible WHERE book = '$book' AND chapter = '$chapter'");
     return maps.length;
   }
 
   Future<LearnStatus> getLearnStatus(int id) async {
-    if (!this.initialized) {this.initialize();}
+    if (!this.initialized) {
+      this.initialize();
+    }
     final localDb = await this.db;
-    final totalArray = await localDb.rawQuery(
-      "SELECT * FROM bible WHERE id = $id"
-    );
+    final totalArray =
+        await localDb.rawQuery("SELECT * FROM bible WHERE id = $id");
     return intToLearnStatus(totalArray[0]["learnStatus"]);
   }
 
   void setLearnStatus(int id, LearnStatus newLearnStatus) async {
-    if (!this.initialized) {this.initialize();}
+    if (!this.initialized) {
+      this.initialize();
+    }
     final localDb = await this.db;
     int learnStatusInt = learnStatusToInt(newLearnStatus);
-    await localDb.execute("UPDATE bible SET learnStatus = $learnStatusInt WHERE id = $id");
+    await localDb.execute(
+        "UPDATE bible SET learnStatus = $learnStatusInt WHERE id = $id");
   }
 
   Future<List<Verse>> getVersesOnLearnStatus(LearnStatus learnStatus) async {
     if (!this.initialized) await this.initialize();
     final localDb = await this.db;
     int learnStatusInt = learnStatusToInt(learnStatus);
-    final maps = await localDb.rawQuery(
-        "SELECT * FROM bible WHERE learnStatus = $learnStatusInt"
-    );
+    final maps = await localDb
+        .rawQuery("SELECT * FROM bible WHERE learnStatus = $learnStatusInt");
     return List.generate(maps.length, (i) {
       return Verse(
         id: maps[i]['id'],
@@ -225,7 +281,7 @@ class DataBaseHelper {
         chapter: maps[i]['chapter'],
         verse: maps[i]['verse'],
         text: maps[i]['text'],
-        learnStatus : intToLearnStatus(maps[i]['learnStatus']),
+        learnStatus: intToLearnStatus(maps[i]['learnStatus']),
         correct: maps[i]['correct'],
         maxCorrect: maps[i]['maxCorrect'],
       );
@@ -235,16 +291,19 @@ class DataBaseHelper {
   void increaseCorrect(int id) async {
     if (!this.initialized) await this.initialize();
     final localDb = await this.db;
-    await localDb.execute("UPDATE bible SET correct = correct + 1 WHERE id = $id");
+    await localDb
+        .execute("UPDATE bible SET correct = correct + 1 WHERE id = $id");
   }
 
   void decreaseCorrect(int id, int amount) async {
     if (!this.initialized) await this.initialize();
     final localDb = await this.db;
-    final maps = await localDb.rawQuery("SELECT correct FROM bible WHERE id = $id");
+    final maps =
+        await localDb.rawQuery("SELECT correct FROM bible WHERE id = $id");
     int oldCorrect = maps[0]['correct'];
     int newCorrect = (oldCorrect - amount > 0) ? oldCorrect - amount : 0;
-    await localDb.execute("UPDATE bible SET correct = $newCorrect WHERE id = $id");
+    await localDb
+        .execute("UPDATE bible SET correct = $newCorrect WHERE id = $id");
   }
 
   void setCorrect(int id, int value) async {
@@ -256,20 +315,23 @@ class DataBaseHelper {
   Future<int> getCorrect(int id) async {
     if (!this.initialized) await this.initialize();
     final localDb = await this.db;
-    final maps = await localDb.rawQuery("SELECT correct FROM bible WHERE id = $id");
+    final maps =
+        await localDb.rawQuery("SELECT correct FROM bible WHERE id = $id");
     return maps[0]['correct'];
   }
 
   void setMaxCorrect(int id, int newMaxCorrect) async {
     if (!this.initialized) await this.initialize();
     final localDb = await this.db;
-    await localDb.execute("UPDATE bible SET maxCorrect = $newMaxCorrect WHERE id = $id");
+    await localDb
+        .execute("UPDATE bible SET maxCorrect = $newMaxCorrect WHERE id = $id");
   }
 
   Future<int> getMaxCorrect(int id) async {
     if (!this.initialized) await this.initialize();
     final localDb = await this.db;
-    final maps = await localDb.rawQuery("SELECT maxCorrect FROM bible WHERE id = $id");
+    final maps =
+        await localDb.rawQuery("SELECT maxCorrect FROM bible WHERE id = $id");
     return maps[0]['maxCorrect'];
   }
 }
@@ -287,12 +349,7 @@ class Passage {
   }
 }
 
-enum LearnStatus {
-  none,
-  selected,
-  current,
-  learned
-}
+enum LearnStatus { none, selected, current, learned }
 
 class Verse {
   final int id;
@@ -304,7 +361,15 @@ class Verse {
   final int correct;
   final int maxCorrect;
 
-  Verse({this.id, this.book, this.chapter, this.verse, this.text, this.learnStatus, this.correct, this.maxCorrect});
+  Verse(
+      {this.id,
+      this.book,
+      this.chapter,
+      this.verse,
+      this.text,
+      this.learnStatus,
+      this.correct,
+      this.maxCorrect});
 
   Map<String, dynamic> toMap() {
     return {
@@ -314,8 +379,8 @@ class Verse {
       'verse': verse,
       'text': text,
       'learnStatus': learnStatus,
-      'correct' : correct,
-      'maxCorrect' : maxCorrect,
+      'correct': correct,
+      'maxCorrect': maxCorrect,
     };
   }
 
@@ -326,6 +391,7 @@ class Verse {
   String passageString() {
     return '${short2long[book]} $chapter, $verse';
   }
+
   @override
   String toString() {
     return 'Verse{id: $id, book: $book, chapter: $chapter, verse: $verse, text: $text, learnStatus $learnStatus}, correct $correct, maxCorrect $maxCorrect';
@@ -400,6 +466,16 @@ final Map<String, String> short2long = {
   "Jud": "Judas",
   "Rev": "Offenbarung",
 };
+
+List<String> getAllBooksMatching(String searchTerm) =>
+    short2long.values.fold(<String>[], (List<String> list, element) {
+      if (element.toLowerCase().contains(searchTerm.toLowerCase()))
+        list.add(element);
+      return list;
+    });
+
+String long2Short(String long) => short2long.keys
+    .fold('', (string, key) => (short2long[key] == long) ? key : string);
 
 final Map<String, int> chapterNumbers = {
   'Gen': 50,

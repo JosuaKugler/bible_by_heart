@@ -32,22 +32,10 @@ class _SelectPassageState extends State<SelectPassage>
     _tabController = TabController(vsync: this, length: myTabs.length);
   }
 
-  List<ListTile> generateBookList() {
-    List<String> bookList = [];
-    short2long.forEach((key, value) {
-      bookList.add(key);
+  void setBook(String book) {
+    setState(() {
+      this.book = book;
     });
-    return bookList.map((String book) {
-      return ListTile(
-        title: Text(short2long[book]),
-        onTap: () {
-          setState(() {
-            this.book = book;
-          });
-          _tabController.animateTo(1, duration: Duration(milliseconds: 150));
-        },
-      );
-    }).toList();
   }
 
   List<InkWell> generateChapterList(String book, BuildContext context) {
@@ -78,16 +66,19 @@ class _SelectPassageState extends State<SelectPassage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Bibelstelle wählen"),
+        title: TextField(
+          onChanged: (text) {print(text);},
+          decoration: InputDecoration(
+              hintText: 'Suche einen Vers'
+          ),
+        ),
         bottom: TabBar(
           controller: _tabController,
           tabs: myTabs,
         ),
       ),
       body: TabBarView(controller: _tabController, children: <Widget>[
-        ListView(
-          children: this.generateBookList(),
-        ),
+        BookSelection(this.setBook, this._tabController),
         GridView(
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 5),
           children: this.generateChapterList(this.book, context),
@@ -96,3 +87,63 @@ class _SelectPassageState extends State<SelectPassage>
     );
   }
 }
+
+
+class BookSelection extends StatefulWidget {
+  final Function setBook;
+  final TabController _tabController;
+
+  BookSelection(this.setBook, this._tabController);
+  @override
+  _BookSelectionState createState() => _BookSelectionState();
+}
+
+class _BookSelectionState extends State<BookSelection> {
+  List<String> bookList;
+
+  @override
+  initState() {
+    bookList = getAllBooksMatching('');
+    super.initState();
+  }
+
+  void setBookList(String searchTerm) {
+    setState(() {
+      bookList = getAllBooksMatching(searchTerm);
+    });
+  }
+
+  List<ListTile> generateBookList() {
+    List<ListTile> retList =  bookList.map((String book) {
+      return ListTile(
+        title: Text(book),
+        onTap: () {
+          widget.setBook(long2Short(book));
+          widget._tabController.animateTo(1, duration: Duration(milliseconds: 150));
+          FocusScope.of(context).unfocus();
+        },
+      );
+    }).toList();
+    retList.insert(0, ListTile(title: TextField(
+      onChanged: setBookList,
+      decoration: InputDecoration(
+          hintText: 'Suche ein Buch'
+      ),
+    ))
+    );
+    return retList;
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => FocusScope.of(context).unfocus(),
+      child: ListView(
+        children: generateBookList(),
+      ),
+    );
+  }
+}
+
+
