@@ -130,17 +130,25 @@ class DataBaseHelper {
     });
   }
 
-  /*
-  Future<List<String>> getAllBooksMatching(String searchTerm) async {
+  Future<List<Verse>> getAllVersesMatching(String searchTerm) async {
     if (!this.initialized) await this.initialize();
     final Database localDb = await this.db;
     final List<Map<String, dynamic>> maps = await localDb.rawQuery(
-        "SELECT book FROM bible WHERE book LIKE '%$searchTerm%' AND chapter = 1 AND verse = 1");
-    List<String> retList =  maps.map((oneMap) => '${oneMap['book']}').toList();
-    //print(retList);
-    return retList;
+        "SELECT * FROM bible WHERE text LIKE '%$searchTerm%'");
+    //print(maps);
+    return List.generate(maps.length, (i) {
+      return Verse(
+        id: maps[i]['id'],
+        book: maps[i]['book'],
+        chapter: maps[i]['chapter'],
+        verse: maps[i]['verse'],
+        text: maps[i]['text'],
+        learnStatus: intToLearnStatus(maps[i]['learnStatus']),
+        correct: maps[i]['correct'],
+        maxCorrect: maps[i]['maxCorrect'],
+      );
+    });
   }
-  */
 
   Future<Verse> getVerseFromId(int id) async {
     if (!this.initialized) await this.initialize();
@@ -469,7 +477,7 @@ final Map<String, String> short2long = {
 
 List<String> getAllBooksMatching(String searchTerm) =>
     short2long.values.fold(<String>[], (List<String> list, element) {
-      if (element.toLowerCase().contains(searchTerm.toLowerCase()))
+      if (element.toLowerCase().contains(RegExp('^${searchTerm.toLowerCase()}')))
         list.add(element);
       return list;
     });
