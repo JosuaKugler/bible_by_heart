@@ -163,11 +163,11 @@ class _BiblePageState extends State<BiblePage> {
 
   AppBar buildAppBar(snapshot) {
     return AppBar(
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          FlatButton(
+      titleSpacing: 0.0,
+      centerTitle: false,
+      title: FlatButton(
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 Text(
                   "${short2long[displayPassage.book]} ${displayPassage.chapter}",
@@ -191,7 +191,7 @@ class _BiblePageState extends State<BiblePage> {
                       )));
             },
           ),
-          IconButton(
+          actions: [IconButton(
             icon: Icon(
               Icons.settings,
               color: Color.fromRGBO(255, 255, 255, 1),
@@ -204,8 +204,7 @@ class _BiblePageState extends State<BiblePage> {
                           this.setSettings, this.fontSize)));
             },
           )
-        ],
-      ),
+    ],
     );
   }
 

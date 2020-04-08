@@ -14,22 +14,50 @@ class DetailPage extends StatefulWidget {
 }
 
 class _DetailPageState extends State<DetailPage> {
-  Future<LearnStatus> learnStatus;
+  Future<Verse> verse;
   @override
   void initState() {
     super.initState();
-    learnStatus = helper.getLearnStatus(widget.verse.id);
+    verse = helper.getVerseFromId(widget.verse.id);
   }
 
-  Future<LearnStatus> changeLearnStatus(
+  Future<Verse> changeLearnStatus (
       int id, LearnStatus newLearnStatus) async {
     helper.setLearnStatus(id, newLearnStatus);
-    return newLearnStatus;
+    return await helper.getVerseFromId(widget.verse.id);
+  }
+
+  Widget createLearnProgressBar(int correct, int maxCorrect) {
+    //Future<int> correct = helper.getCorrect(widget.verse.id);
+    //Future<int> maxCorrect = helper.getMaxCorrect(widget.verse.id);
+    return ListTile(
+      leading: Icon(Icons.trending_up),
+      title: Text('Lernfortschritt: $correct / $maxCorrect'),
+      subtitle: Row(
+        mainAxisSize: MainAxisSize.max,
+        children: <Widget>[
+          Flexible(
+            flex: correct,
+            child: Container(
+              height: 20,
+              color: Colors.green,
+            ),
+          ),
+          Flexible(
+            flex: maxCorrect - correct,
+            child: Container(
+              height: 20,
+              color: Colors.red,
+            ),
+          )
+        ],
+      ),
+    );
   }
 
   Widget createBibleButton() {
-    return RaisedButton(
-      onPressed: () async {
+    return GestureDetector(
+      onTap: () async {
         SharedPreferences preferences = await SharedPreferences.getInstance();
         await preferences.setString("book", widget.verse.book);
         await preferences.setInt("chapter", widget.verse.chapter);
@@ -37,18 +65,18 @@ class _DetailPageState extends State<DetailPage> {
         Navigator.pop(context);
         Navigator.pop(context);
       },
-      child: Row(
-        children: <Widget>[
-          Icon(Icons.forward),
-          Text('Im Kontext ansehen'),
-        ],
-      ),
+      child: Center(
+        child: Padding(
+          padding: EdgeInsets.all(8),
+          child: Text(widget.verse.text),
+        )
+      )
     );
   }
 
   Widget createLearnButton() {
-    return RaisedButton(
-      onPressed: () async {
+    return GestureDetector(
+      onTap: () async {
         SharedPreferences preferences = await SharedPreferences.getInstance();
         List<String> shuffleFromPreferences =
             preferences.getStringList("shuffledList") ?? null;
@@ -78,51 +106,11 @@ class _DetailPageState extends State<DetailPage> {
         Navigator.pop(context);
         Navigator.pop(context);
       },
-      child: Row(
-        children: <Widget>[
-          Icon(Icons.forward),
-          Text("Auf Lernseite ansehen"),
-        ],
+      child: ListTile(
+          leading: Icon(Icons.forward),
+          title: Text("Auf Lernseite ansehen"),
       ),
     );
-  }
-
-  List<Widget> createRadioSelection(LearnStatus oldLearnStatus) {
-    return <Widget>[
-      RadioListTile<LearnStatus>(
-        value: LearnStatus.current,
-        groupValue: oldLearnStatus,
-        onChanged: (LearnStatus learnStatus) async {
-          await createSnackBar(
-              "${widget.verse.passageString()} wurde zur aktuellen Lernsammlung hinzugefügt",
-              context);
-          setLearnStatus(widget.verse, learnStatus);
-        },
-        title: Text("Lernen"),
-      ),
-      RadioListTile<LearnStatus>(
-        value: LearnStatus.selected,
-        groupValue: oldLearnStatus,
-        onChanged: (LearnStatus learnStatus) async {
-          await createSnackBar(
-              "${widget.verse.passageString()} wurde zum Lernen vorgemerkt",
-              context);
-          setLearnStatus(widget.verse, learnStatus);
-        },
-        title: Text("Vormerken"),
-      ),
-      RadioListTile<LearnStatus>(
-        value: LearnStatus.learned,
-        groupValue: oldLearnStatus,
-        onChanged: (LearnStatus learnStatus) async {
-          await createSnackBar(
-              "${widget.verse.passageString()} wurde als bereits gelernt gekennzeichnet",
-              context);
-          setLearnStatus(widget.verse, learnStatus);
-        },
-        title: Text("Ich kann diesen Vers schon"),
-      ),
-    ];
   }
 
   Widget createButtonBar(LearnStatus oldLearnStatus) {
@@ -146,35 +134,83 @@ class _DetailPageState extends State<DetailPage> {
     );
   }
 
+  Widget createSetLStoNone() {
+    return GestureDetector(
+      child: ListTile(
+        leading: Icon(Icons.delete),
+        title: Text("Lernstatus löschen"),
+        subtitle: Text("Vers wird aus 'vorgemerkt', 'Lernen' oder 'bereits gelernt' entfernt"),
+      ),
+      onTap: () => setLearnStatus(widget.verse, LearnStatus.none),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: learnStatus,
-        builder: (BuildContext context, AsyncSnapshot<LearnStatus> snapshot) {
+        future: verse,//change to verse
+        builder: (BuildContext context, AsyncSnapshot<Verse> snapshot) {
           Widget body;
           if (snapshot.hasData) {
-            List<Widget> listChildren = [createBibleButton()];
-            if (snapshot.data == LearnStatus.current)
-              listChildren.add(createLearnButton());
-            listChildren.addAll(createRadioSelection(snapshot.data));
-            listChildren.add(createButtonBar(snapshot.data));
             body = LayoutBuilder(
                 builder: (context, BoxConstraints viewPortConstraints) =>
                     SingleChildScrollView(
                       child: ConstrainedBox(
                         constraints: BoxConstraints(
                             minHeight: viewPortConstraints.maxHeight),
-                        child: Column(
-                          //mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Center(
-                                child: Padding(
-                                    padding: EdgeInsets.all(8),
-                                    child: Text(widget.verse.text))),
-                            Column(
-                              children: listChildren,
-                            )
-                          ],
+                        child: IntrinsicHeight(
+                          child: Column(
+                            //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisSize: MainAxisSize.max,
+                            children: [
+                              Expanded(
+                                  child: createBibleButton(),
+                              ),
+                              Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  if (snapshot.data.learnStatus == LearnStatus.current) createLearnProgressBar(snapshot.data.correct, snapshot.data.maxCorrect),
+                                  if (snapshot.data.learnStatus == LearnStatus.current) createLearnButton(),
+                                  createSetLStoNone(),
+                                  RadioListTile<LearnStatus>(
+                                    value: LearnStatus.current,
+                                    groupValue: snapshot.data.learnStatus,
+                                    onChanged: (LearnStatus learnStatus) async {
+                                      print("onchanged was called!");
+                                      await createSnackBar(
+                                          "${widget.verse.passageString()} wurde zur aktuellen Lernsammlung hinzugefügt",
+                                          context);
+                                      setLearnStatus(widget.verse, learnStatus);
+                                    },
+                                    title: Text("Lernen"),
+                                  ),
+                                  RadioListTile<LearnStatus>(
+                                    value: LearnStatus.selected,
+                                    groupValue: snapshot.data.learnStatus,
+                                    onChanged: (LearnStatus learnStatus) async {
+                                      await createSnackBar(
+                                          "${widget.verse.passageString()} wurde zum Lernen vorgemerkt",
+                                          context);
+                                      setLearnStatus(widget.verse, learnStatus);
+                                    },
+                                    title: Text("Vormerken"),
+                                  ),
+                                  RadioListTile<LearnStatus>(
+                                    value: LearnStatus.learned,
+                                    groupValue: snapshot.data.learnStatus,
+                                    onChanged: (LearnStatus learnStatus) async {
+                                      await createSnackBar(
+                                          "${widget.verse.passageString()} wurde als bereits gelernt gekennzeichnet",
+                                          context);
+                                      setLearnStatus(widget.verse, learnStatus);
+                                    },
+                                    title: Text("Ich kann diesen Vers schon"),
+                                  ),
+                                  createButtonBar(snapshot.data.learnStatus),
+                                ],
+                              )
+                            ],
+                          ),
                         ),
                       ),
                     ));
@@ -194,7 +230,7 @@ class _DetailPageState extends State<DetailPage> {
 
   void setLearnStatus(Verse verse, LearnStatus learnStatus) {
     setState(() {
-      this.learnStatus = changeLearnStatus(verse.id, learnStatus);
+      this.verse = changeLearnStatus(verse.id, learnStatus);
     });
   }
 }

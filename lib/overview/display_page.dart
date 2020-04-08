@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 
 import '../learn/select_verse_page.dart';
+import '../bible/add_verse_page.dart';
 import 'detail_page.dart';
 
 class Display extends StatelessWidget {
