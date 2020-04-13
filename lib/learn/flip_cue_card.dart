@@ -64,56 +64,121 @@ class _FlipCueCardState extends State<FlipCueCard>
 
   @override
   Widget build(BuildContext context) {
+    double iconSize = 30;
     return Scaffold(
-      appBar: AppBar(
-          title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-            Text("Lernen"),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Opacity(
-                  opacity: animationController.value,
-                  child: Row(
-                    children: <Widget>[
-                      IconButton(
-                        icon: Icon(Icons.done),
-                        color: Color.fromARGB(255, 0, 255, 0),
-                        iconSize: 40,
-                        onPressed: (animationController.value == 1) ? () {
-                          superOnDismissed(DismissDirection.startToEnd); //correct
-                        } : null,
+      appBar: PreferredSize(
+        preferredSize: Size(double.infinity, 60),
+        child: Container(
+          height: 80,
+          width: MediaQuery.of(context).size.width,
+          color: Theme.of(context).accentColor,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              Container(
+                height: 56,
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: DefaultTextStyle(
+                      style: Theme.of(context).primaryTextTheme.title,
+                      softWrap: false,
+                      overflow: TextOverflow.ellipsis,
+                      child: Semantics(
+                        child: Text("Lernen"),
+                        header: true,
                       ),
-                      IconButton(
-                        icon: Icon(Icons.clear),
-                        iconSize: 40,
-                        color: Colors.red,
-                        onPressed: (animationController.value == 1) ? () {
-                          superOnDismissed(DismissDirection.endToStart); //wrong
-                        } : null,
-                      ),
-                    ],
+                    ),
                   ),
                 ),
-                (animationStatus != AnimationStatus.dismissed)
-                    ? IconButton(
-                        icon: Icon(Icons.sync),
-                        iconSize: 40,
-                        onPressed: () {
-                          animationController.reverse();
-                        },
-                      )
-                    : IconButton(
-                        icon: Icon(Icons.sync),
-                        iconSize: 40,
-                        onPressed: () {
-                          animationController.forward();
-                        },
-                      )
-              ],
-            ),
-          ])),
+              ),
+              Container(
+                height: 56,
+                width: 220,
+                child: Stack(children: [
+                  Positioned(
+                    height: 60,
+                    bottom: 0,
+                    width: 112,
+                    right: animationController.value * 80 - 30,
+                    child: Row(
+                      children: <Widget>[
+                        Center(
+                          child: IconButton(
+                              icon: Icon(
+                                Icons.done,
+                              ),
+                              color: Color.fromARGB(255, 0, 255, 0),
+                              iconSize: iconSize,
+                              onPressed: (animationController.value == 1)
+                                  ? () {
+                                      superOnDismissed(DismissDirection
+                                          .startToEnd); //correct
+                                    }
+                                  : () {}),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.clear),
+                          iconSize: iconSize,
+                          color: Colors.red,
+                          onPressed: (animationController.value == 1)
+                              ? () {
+                                  superOnDismissed(
+                                      DismissDirection.endToStart); //wrong
+                                }
+                              : () {},
+                        ),
+                      ],
+                    ),
+                  ),
+                  Positioned(
+                      width: 70,
+                      right: 0,
+                      bottom: 0,
+                      top: 0,
+                      child: Container(color: Theme.of(context).accentColor)),
+                  Positioned(
+                    right: 10,
+                    bottom: 0,
+                    height: 56,
+                    child: Row(
+                      children: <Widget>[
+                        Center(
+                          child: Container(
+                            width: 2,
+                            height: 56,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Center(
+                          child: (animationStatus != AnimationStatus.dismissed)
+                              ? IconButton(
+                                  icon: Icon(Icons.sync),
+                                  color: Colors.white,
+                                  iconSize: iconSize,
+                                  onPressed: () {
+                                    animationController.reverse();
+                                  },
+                                )
+                              : IconButton(
+                                  icon: Icon(Icons.sync),
+                                  iconSize: iconSize,
+                                  color: Colors.white,
+                                  onPressed: () {
+                                    animationController.forward();
+                                  },
+                                ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ]),
+              )
+            ],
+          ),
+        ),
+      ),
       body: Container(
         color: Color.fromARGB(255, 27, 28, 30),
         child: Center(
@@ -219,7 +284,10 @@ class BackSide extends StatelessWidget {
                               fontWeight: FontWeight.bold,
                               fontSize: 20.0,
                               color: Colors.black)),
-                      Text('${verse.passageString()}', style: TextStyle(fontSize: 15, color: Colors.grey),)
+                      Text(
+                        '${verse.passageString()}',
+                        style: TextStyle(fontSize: 15, color: Colors.grey),
+                      )
                     ],
                   ),
                 ),

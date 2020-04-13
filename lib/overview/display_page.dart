@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 
 import '../learn/select_verse_page.dart';
-import '../bible/add_verse_page.dart';
 import 'detail_page.dart';
 
 class Display extends StatelessWidget {
@@ -106,11 +105,11 @@ class _CategoryListState extends State<CategoryList> {
                         return Dismissible(
                           onDismissed: (DismissDirection direction) async {
                             if (direction == DismissDirection.endToStart) {
-                              await helper.setLearnStatus(
-                                  snapshot.data[index].id, widget.dismissStatus[1]);
+                              helper.setLearnStatus(
+                                  snapshot.data[index].id, widget.dismissStatus[1]); //probably await?
                             } else {
-                              await helper.setLearnStatus(
-                                  snapshot.data[index].id, widget.dismissStatus[0]);
+                              helper.setLearnStatus(
+                                  snapshot.data[index].id, widget.dismissStatus[0]); //probably await?
                             }
                             widget.rebuild();
                           },

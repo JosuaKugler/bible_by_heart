@@ -40,14 +40,6 @@ class _CueCardState extends State<CueCard> {
     });
   }
 
-  void _learned(bool yes) {
-    if (yes) {
-      widget.finishCurrentVerse();
-    } else {
-      widget.continueCurrentVerse();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     Widget result;
@@ -110,31 +102,48 @@ class _CueCardState extends State<CueCard> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                IconButton(
-                  icon: Icon(Icons.replay),
-                  onPressed: () async {
-                    final int newMaxCorrect = await showDialog<int>(
-                      context: context,
-                      builder: (context) => NewMaxCorrectDialog(),
-                    );
-                    if (newMaxCorrect > 0) {
-                      await widget.continueCurrentVerseAnyway(newMaxCorrect);
-                      setState(() {
-                        maxReached = false;
-                      });
-                    }
-                  },
-                  tooltip: "Vers trotzdem weiterlernen",
+                Flexible(
+                  flex: 1,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      IconButton(
+                        icon: Icon(Icons.replay),
+                        onPressed: () async {
+                          final int newMaxCorrect = await showDialog<int>(
+                            context: context,
+                            builder: (context) => NewMaxCorrectDialog(),
+                          );
+                          if (newMaxCorrect > 0) {
+                            await widget.continueCurrentVerseAnyway(newMaxCorrect);
+                            setState(() {
+                              maxReached = false;
+                            });
+                          }
+                        },
+                        tooltip: "Vers trotzdem weiterlernen",
+                      ),
+                      Text('Vers nochmal wiederholen', textAlign: TextAlign.center,)
+                    ],
+                  ),
                 ),
-                IconButton(
-                  icon: Icon(Icons.arrow_forward),
-                  onPressed: () async {
-                    await widget.finishCurrentVerse();
-                    setState(() {
-                      maxReached = false;
-                    });
-                  },
-                  tooltip: 'Vers als gelernt markieren',
+                Flexible(
+                  flex: 1,
+                  child: Column(
+                    children: <Widget>[
+                      IconButton(
+                        icon: Icon(Icons.arrow_forward),
+                        onPressed: () async {
+                          await widget.finishCurrentVerse();
+                          setState(() {
+                            maxReached = false;
+                          });
+                        },
+                        tooltip: 'Vers als gelernt markieren',
+                      ),
+                      Text('Vers als gelernt markieren', textAlign: TextAlign.center,)
+                    ],
+                  ),
                 )
               ],
             )
@@ -179,7 +188,6 @@ class _NewMaxCorrectDialogState extends State<NewMaxCorrectDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('newMaxCorrect'),
       content: Container(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -198,30 +206,32 @@ class _NewMaxCorrectDialogState extends State<NewMaxCorrectDialog> {
               },
             ),
             Text('${newMaxCorrect.floor()}'),
-          ],
-        ),
-      ),
-      actions: <Widget>[
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            FlatButton(
-              onPressed: () {
-                Navigator.pop(context, 0);
-              },
-              child: Text('Abbrechen'),
+            Container(
+              height: 20,
             ),
-            FlatButton(
-              onPressed: () {
-                // Use the second argument of Navigator.pop(...) to pass
-                // back a result to the page that opened the dialog
-                Navigator.pop(context, newMaxCorrect.floor());
-              },
-              child: Text('Ok'),
+            Row(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                FlatButton(
+                  onPressed: () {
+                    Navigator.pop(context, 0);
+                  },
+                  child: Text('Abbrechen'),
+                ),
+                FlatButton(
+                  onPressed: () {
+                    // Use the second argument of Navigator.pop(...) to pass
+                    // back a result to the page that opened the dialog
+                    Navigator.pop(context, newMaxCorrect.floor());
+                  },
+                  child: Text('Ok'),
+                )
+              ],
             )
           ],
         ),
-      ],
+      ),
     );
   }
 }

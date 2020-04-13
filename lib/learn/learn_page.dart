@@ -7,8 +7,6 @@ import '../backend/db_interaction.dart';
 import 'cue_card.dart';
 
 class LearnPage extends StatefulWidget {
-  final Function _onItemTapped;
-  LearnPage(this._onItemTapped);
   @override
   _LearnPageState createState() => _LearnPageState();
 }
@@ -68,11 +66,11 @@ class _LearnPageState extends State<LearnPage> {
           localCVS.shuffle();
           shuffleCounter = localCVS.length;
         }
-        List<int> localCVSid = localCVS.fold([], (previousValue, element) {
+        /* List<int> localCVSid = localCVS.fold([], (previousValue, element) {
           previousValue.add(element.id);
           return previousValue;
         });
-        print(localCVSid);
+        print(localCVSid); */
         return localCVS;
       });
     }
@@ -116,7 +114,7 @@ class _LearnPageState extends State<LearnPage> {
   //call when the current Verse was correct
   Future<bool> currentVerseLearned() async {
     Verse verse = await currentVersesShuffle.then((list) => list.last);
-    await helper.increaseCorrect(verse.id);
+    helper.increaseCorrect(verse.id);
     int correct = await helper.getCorrect(verse.id);
     int maxCorrect = await helper.getMaxCorrect(verse.id);
     bool maxCorrectReached = correct >= maxCorrect;
@@ -148,8 +146,8 @@ class _LearnPageState extends State<LearnPage> {
   //call when current Verse was wrong
   void currentVerseWrong() async {
     Verse verse = await currentVersesShuffle.then((list) => list.last);
-    await helper.decreaseCorrect(verse.id, 2); //probably change default
-    await this.continueCurrentVerse();
+    helper.decreaseCorrect(verse.id, 1); //probably change default //probably await?
+    this.continueCurrentVerse(); //probably await?
   }
 
   writePreferences() async {

@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../backend/db_interaction.dart';
-import '../bible/search_results_page.dart';
 
 class SelectPassage extends StatefulWidget {
   @override

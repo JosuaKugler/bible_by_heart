@@ -119,7 +119,7 @@ class _AddVersePageState extends State<AddVersePage> {
       action: SnackBarAction(
         label: "Rückgängig",
         onPressed: () {
-          print(oldLearnStatus);
+          //print(oldLearnStatus);
           helper.setLearnStatus(widget.verse.id, oldLearnStatus);
         },
       ),

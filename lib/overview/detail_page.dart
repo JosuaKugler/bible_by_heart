@@ -176,7 +176,7 @@ class _DetailPageState extends State<DetailPage> {
                                     value: LearnStatus.current,
                                     groupValue: snapshot.data.learnStatus,
                                     onChanged: (LearnStatus learnStatus) async {
-                                      print("onchanged was called!");
+                                      //print("onchanged was called!");
                                       await createSnackBar(
                                           "${widget.verse.passageString()} wurde zur aktuellen Lernsammlung hinzugefügt",
                                           context);

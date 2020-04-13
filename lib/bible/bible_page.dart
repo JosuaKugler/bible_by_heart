@@ -8,8 +8,6 @@ import 'settings_page.dart';
 import 'add_verse_page.dart';
 
 class BiblePage extends StatefulWidget {
-  final Function _onItemTapped;
-  BiblePage(this._onItemTapped);
 
   @override
   _BiblePageState createState() => _BiblePageState();

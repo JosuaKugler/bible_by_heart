@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Bibel lernen',
+      title: 'BibleByHeart',
       home: Home(),
     );
   }
@@ -37,8 +37,8 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     final _pages = <Widget>[
       OverviewPage(this._onItemTapped),
-      LearnPage(this._onItemTapped),
-      BiblePage(this._onItemTapped),
+      LearnPage(),
+      BiblePage(),
     ];
     return Scaffold(
       body: _pages[_selectedIndex],
