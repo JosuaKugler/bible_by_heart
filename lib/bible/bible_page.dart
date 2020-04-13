@@ -1,36 +1,34 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../backend/db_interaction.dart';
-import 'select_passage_page.dart';
+//import 'select_passage_page.dart';
 import 'settings_page.dart';
 import 'add_verse_page.dart';
+import '../learn/select_verse_page.dart';
 
 class BiblePage extends StatefulWidget {
-
   @override
   _BiblePageState createState() => _BiblePageState();
 }
 
 class _BiblePageState extends State<BiblePage> {
   _BiblePageState();
-  ScrollController scrollController;
-  Passage displayPassage = Passage("Gen", 1, 1);
-  double offset = 0;
-  Future<List<Verse>> _verseList;
+  final ItemScrollController itemScrollController = ItemScrollController();
+  ItemPosition firstItemPosition;
+  Future<Passage> displayPassage;
+  double alignment = 0;
   double fontSize = 18.0;
   bool buttonsVisible = true;
+
+  
 
   @override
   void initState() {
     super.initState();
-    Future<Passage> futureDisplayPassage = getInformation();
-    _verseList = futureDisplayPassage.then(helper.getChapterFromPassage);
-    scrollController = ScrollController(initialScrollOffset: 0)
-        ..addListener(() {
-      setButtonsVisible(scrollController.position.userScrollDirection == ScrollDirection.forward);
-    });
+    displayPassage = getInformation();
   }
 
   void setButtonsVisible(bool value) {
@@ -43,17 +41,10 @@ class _BiblePageState extends State<BiblePage> {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String book = preferences.getString("book") ?? "Gen";
     int chapter = preferences.getInt("chapter") ?? 1;
-    offset = preferences.getDouble("offset") ?? 0;
-    fontSize = preferences.getDouble("fontSize") ?? 18;
-    scrollController = ScrollController(initialScrollOffset: offset)
-    ..addListener(() {
-      setButtonsVisible(scrollController.position.userScrollDirection ==
-          ScrollDirection.forward);
-    });
-    //scrollController.jumpTo(offset);
-    displayPassage = Passage(book, chapter, 1);
-    //print("I have just read $displayPassage from SharedPreferences");
-    return displayPassage;
+    int verse = preferences.getInt("verse") ?? 1;
+    this.alignment = preferences.getDouble("alignment") ?? 0;
+    this.fontSize = preferences.getDouble("fontSize") ?? 18;
+    return Passage(book, chapter, verse);
   }
 
   void setSettings(double newFontSize) {
@@ -63,43 +54,27 @@ class _BiblePageState extends State<BiblePage> {
   }
 
   void setNewChapter(Passage passage) async {
-    displayPassage = passage;
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    preferences.setString("book", displayPassage.book);
-    preferences.setInt("chapter", displayPassage.chapter);
+    preferences.setString("book", passage.book);
+    preferences.setInt("chapter", passage.chapter);
+    preferences.setInt("verse", 1);
     setState(() {
-      _verseList = helper.getChapterFromPassage(displayPassage);
-      scrollController.jumpTo(0);
-      offset = 0;
+      alignment = 0;
+      displayPassage =
+          displayPassage.then((_) => passage); // turn passage into a future xD
     });
   }
 
   void incrementChapter() async {
-    Verse temp = await helper.getNextChapterVerse(displayPassage);
-    displayPassage = temp.toPassage();
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    preferences.setString("book", displayPassage.book);
-    preferences.setInt("chapter", displayPassage.chapter);
-    //print("I have just saved $displayPassage to SharedPreferences");
-    setState(() {
-      _verseList = helper.getChapterFromPassage(displayPassage);
-      scrollController.jumpTo(0);
-      offset = 0;
-    });
+    Passage temp = await displayPassage
+        .then((displayPassage) => helper.getNextChapterPassage(displayPassage));
+    setNewChapter(temp);
   }
 
   void decrementChapter() async {
-    Verse temp = await helper.getPreviousChapterVerse(displayPassage);
-    displayPassage = temp.toPassage();
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    preferences.setString("book", displayPassage.book);
-    preferences.setInt("chapter", displayPassage.chapter);
-    //print("I have just saved $displayPassage to SharedPreferences");
-    setState(() {
-      _verseList = helper.getChapterFromPassage(displayPassage);
-      scrollController.jumpTo(0);
-      offset = 0;
-    });
+    Passage temp = await displayPassage
+        .then((displayPassage) => helper.getPreviousChapterPassage(displayPassage));
+    setNewChapter(temp);
   }
 
   static getVerseNumber(int verseNumber) {
@@ -123,7 +98,8 @@ class _BiblePageState extends State<BiblePage> {
     return superString;
   }
 
-  List<Widget> versesToWidget(List<Verse> verseList, BuildContext scaffoldContext) {
+  List<Widget> versesToWidget(
+      List<Verse> verseList, BuildContext scaffoldContext) {
     List<Widget> list = List.generate(verseList.length, (i) {
       return GestureDetector(
         onTap: () {
@@ -151,6 +127,10 @@ class _BiblePageState extends State<BiblePage> {
           onPressed: this.decrementChapter,
         ),
         IconButton(
+            icon: Icon(Icons.arrow_upward),
+            onPressed: () => itemScrollController.scrollTo(
+                index: 0, duration: Duration(milliseconds: 500), curve: Curves.easeInCubic)),
+        IconButton(
           icon: Icon(Icons.arrow_right),
           onPressed: this.incrementChapter,
         ),
@@ -159,69 +139,80 @@ class _BiblePageState extends State<BiblePage> {
     return list;
   }
 
-  AppBar buildAppBar(snapshot) {
+  AppBar buildAppBar(Passage passage) {
     return AppBar(
       titleSpacing: 0.0,
       centerTitle: false,
       title: FlatButton(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Text(
-                  "${short2long[displayPassage.book]} ${displayPassage.chapter}",
-                  style: TextStyle(
-                      color: Color.fromRGBO(255, 255, 255, 1),
-                      fontSize: 20.0),
-                ),
-                Icon(
-                  Icons.arrow_drop_down,
-                  color: Color.fromRGBO(255, 255, 255, 1),
-                )
-              ],
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Text(
+              "${short2long[passage.book]} ${passage.chapter}",
+              style: TextStyle(
+                  color: Color.fromRGBO(255, 255, 255, 1), fontSize: 20.0),
             ),
-            onPressed: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => SelectPassage(
-                        this.setNewChapter,
-                        this.displayPassage,
-                      )));
-            },
-          ),
-          actions: [IconButton(
-            icon: Icon(
-              Icons.settings,
+            Icon(
+              Icons.arrow_drop_down,
               color: Color.fromRGBO(255, 255, 255, 1),
-            ),
-            onPressed: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => SettingsPage(
-                          this.setSettings, this.fontSize)));
-            },
-          )
-    ],
+            )
+          ],
+        ),
+        onPressed: () async {
+          double localAlignment = firstItemPosition.itemLeadingEdge;
+          Passage newVerse = await Navigator.push(context,
+              MaterialPageRoute(builder: (context) => SelectPassage()));
+          if (newVerse != null) {
+            setState(() {
+              alignment = 0;
+              displayPassage = displayPassage.then((_) => newVerse);
+            });
+          }
+          else {
+            setState(() {
+              alignment = localAlignment;
+            });
+          }
+        },
+      ),
+      actions: [
+        IconButton(
+          icon: Icon(
+            Icons.settings,
+            color: Color.fromRGBO(255, 255, 255, 1),
+          ),
+          onPressed: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        SettingsPage(this.setSettings, this.fontSize)));
+          },
+        )
+      ],
     );
   }
 
-  Widget buildBody(snapshot) {
-    return NotificationListener(
-      child: ListView.builder(
-        controller: scrollController,
-        itemCount: snapshot.data.length + 1,
-        itemBuilder: (context, index) {
-          return versesToWidget(snapshot.data, context)[index];
-        },
-      ),
-      onNotification: (notification) {
-        if (notification is ScrollNotification) {
-          offset = notification.metrics.pixels;
-          return true;
-        }
-        return false;
+  void updatePositions(itemPositions) {
+      this.firstItemPosition = itemPositions.toList()[0];
+    }
+
+  Widget buildBody(List<Verse> verseList, int verse) {
+    final ItemPositionsListener itemPositionsListener =
+        ItemPositionsListener.create();
+    itemPositionsListener.itemPositions.addListener(
+        () => updatePositions(itemPositionsListener.itemPositions.value));
+    print(verse);
+    try {itemScrollController.jumpTo(index: verse - 1, alignment: alignment);} catch (_) {} //when page is reloaded
+    return ScrollablePositionedList.builder(
+      itemScrollController: itemScrollController,
+      itemPositionsListener: itemPositionsListener,
+      itemCount: verseList.length + 1,
+      itemBuilder: (context, index) {
+        return versesToWidget(verseList, context)[index];
       },
+      initialScrollIndex: verse - 1,
+      initialAlignment: alignment,
     );
   }
 
@@ -229,38 +220,50 @@ class _BiblePageState extends State<BiblePage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
-        if (this.buttonsVisible) Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Container(
-              width: 30,
-              height: 0,
-            ),
-            FloatingActionButton(
-              onPressed: this.decrementChapter,
-              child: Icon(Icons.arrow_back_ios),
-              heroTag: null,
-            ),
-          ],
-        ),
-        if (this.buttonsVisible) FloatingActionButton(
-          onPressed: this.incrementChapter,
-          child: Icon(Icons.arrow_forward_ios),
-          heroTag: null,
-        )
+        if (this.buttonsVisible)
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Container(
+                width: 30,
+                height: 0,
+              ),
+              FloatingActionButton(
+                onPressed: this.decrementChapter,
+                child: Icon(Icons.arrow_back_ios),
+                heroTag: null,
+              ),
+            ],
+          ),
+        if (this.buttonsVisible)
+          FloatingActionButton(
+            onPressed: this.incrementChapter,
+            child: Icon(Icons.arrow_forward_ios),
+            heroTag: null,
+          )
       ],
     );
   }
+
+  Future<List<dynamic>> passageAndVerseList() async {
+    Passage passage = await displayPassage.then((passage) => passage);
+    List<Verse> verseList = await helper.getChapterFromPassage(passage);
+    List<dynamic> retList = [passage, verseList];
+    return retList;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Verse>>(
-      future: this._verseList, // a previously-obtained Future or null
-      builder: (BuildContext context, AsyncSnapshot<List<Verse>> snapshot) {
+    return FutureBuilder<List<dynamic>>(
+      future: passageAndVerseList(),
+      builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
         Widget result;
         if (snapshot.hasData) {
+          Passage localPassage = snapshot.data[0];
+          List<Verse> verseList = snapshot.data[1];
           result = Scaffold(
-            appBar: buildAppBar(snapshot),
-            body: buildBody(snapshot),
+            appBar: buildAppBar(localPassage),
+            body: buildBody(verseList, localPassage.verse),
             floatingActionButton: buildButtons(),
           );
         } else if (snapshot.hasError) {
@@ -283,10 +286,14 @@ class _BiblePageState extends State<BiblePage> {
   @override
   void dispose() async {
     super.dispose();
+    print("dispose called");
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    preferences.setString("book", displayPassage.book);
-    preferences.setInt("chapter", displayPassage.chapter);
-    preferences.setDouble("offset", offset);
+    preferences.setString(
+        "book", await displayPassage.then((passage) => passage.book));
+    preferences.setInt(
+        "chapter", await displayPassage.then((passage) => passage.chapter));
+    preferences.setInt("verse", firstItemPosition.index + 1);
+    preferences.setDouble("alignment", firstItemPosition.itemLeadingEdge);
     preferences.setDouble("fontSize", fontSize);
   }
 }

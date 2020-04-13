@@ -219,13 +219,14 @@ class DataBaseHelper {
   }
 
   //returns the last verse of the previous chapter
-  Future<Verse> getPreviousChapterVerse(Passage passage) async {
+  Future<Passage> getPreviousChapterPassage(Passage passage) async {
     Passage temp = Passage(passage.book, passage.chapter, 1);
-    return await getRelativeVerse(temp, -1);
+    Verse previousChapterLast = await getRelativeVerse(temp, -1);
+    return Passage(previousChapterLast.book, previousChapterLast.chapter, 1);
   }
 
   //returns the first verse of the next chapter
-  Future<Verse> getNextChapterVerse(Passage passage) async {
+  Future<Passage> getNextChapterPassage(Passage passage) async {
     if (!this.initialized) {
       this.initialize();
     }
@@ -233,7 +234,8 @@ class DataBaseHelper {
     final maps = await localDb.rawQuery(
         "SELECT * FROM bible WHERE book = '${passage.book}' AND chapter = ${passage.chapter}");
     Passage temp = Passage(passage.book, passage.chapter, maps.length);
-    return await getRelativeVerse(temp, 1);
+    Verse retVerse = await getRelativeVerse(temp, 1);
+    return retVerse.toPassage();
   }
 
   Future<int> getNumberOfChapters(String book) async {
