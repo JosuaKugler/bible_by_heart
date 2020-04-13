@@ -62,6 +62,7 @@ class _BiblePageState extends State<BiblePage> {
       displayPassage =
           displayPassage.then((_) => passage); // turn passage into a future xD
     });
+    itemScrollController.jumpTo(index: 0);
   }
 
   void incrementChapter() async {
@@ -167,6 +168,7 @@ class _BiblePageState extends State<BiblePage> {
             setState(() {
               alignment = 0;
               displayPassage = displayPassage.then((_) => newVerse);
+              itemScrollController.jumpTo(index: newVerse.verse - 1);
             });
           } else {
             setState(() {
