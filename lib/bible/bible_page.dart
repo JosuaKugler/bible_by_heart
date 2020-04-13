@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+//import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import '../myscrollable_positioned_list/lib/scrollable_positioned_list.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../backend/db_interaction.dart';
-//import 'select_passage_page.dart';
 import 'settings_page.dart';
 import 'add_verse_page.dart';
 import '../learn/select_verse_page.dart';
@@ -15,26 +15,19 @@ class BiblePage extends StatefulWidget {
 }
 
 class _BiblePageState extends State<BiblePage> {
-  _BiblePageState();
   final ItemScrollController itemScrollController = ItemScrollController();
-  ItemPosition firstItemPosition;
+  final ScrollController scrollController =
+      ScrollController(keepScrollOffset: false);
   Future<Passage> displayPassage;
+  ItemPosition firstItemPosition;
   double alignment = 0;
   double fontSize = 18.0;
   bool buttonsVisible = true;
-
-  
 
   @override
   void initState() {
     super.initState();
     displayPassage = getInformation();
-  }
-
-  void setButtonsVisible(bool value) {
-    setState(() {
-      buttonsVisible = value;
-    });
   }
 
   Future<Passage> getInformation() async {
@@ -45,6 +38,12 @@ class _BiblePageState extends State<BiblePage> {
     this.alignment = preferences.getDouble("alignment") ?? 0;
     this.fontSize = preferences.getDouble("fontSize") ?? 18;
     return Passage(book, chapter, verse);
+  }
+
+  void setButtonsVisible(bool value) {
+    setState(() {
+      buttonsVisible = value;
+    });
   }
 
   void setSettings(double newFontSize) {
@@ -72,8 +71,8 @@ class _BiblePageState extends State<BiblePage> {
   }
 
   void decrementChapter() async {
-    Passage temp = await displayPassage
-        .then((displayPassage) => helper.getPreviousChapterPassage(displayPassage));
+    Passage temp = await displayPassage.then(
+        (displayPassage) => helper.getPreviousChapterPassage(displayPassage));
     setNewChapter(temp);
   }
 
@@ -129,7 +128,9 @@ class _BiblePageState extends State<BiblePage> {
         IconButton(
             icon: Icon(Icons.arrow_upward),
             onPressed: () => itemScrollController.scrollTo(
-                index: 0, duration: Duration(milliseconds: 500), curve: Curves.easeInCubic)),
+                index: 0,
+                duration: Duration(milliseconds: 500),
+                curve: Curves.easeInCubic)),
         IconButton(
           icon: Icon(Icons.arrow_right),
           onPressed: this.incrementChapter,
@@ -167,8 +168,7 @@ class _BiblePageState extends State<BiblePage> {
               alignment = 0;
               displayPassage = displayPassage.then((_) => newVerse);
             });
-          }
-          else {
+          } else {
             setState(() {
               alignment = localAlignment;
             });
@@ -194,19 +194,28 @@ class _BiblePageState extends State<BiblePage> {
   }
 
   void updatePositions(itemPositions) {
-      this.firstItemPosition = itemPositions.toList()[0];
+    this.firstItemPosition = itemPositions.toList()[0];
+  }
+
+  void buttonVisibilityListener() {
+    bool forward = (scrollController.position.userScrollDirection ==
+            ScrollDirection.forward);
+    if (buttonsVisible != forward) {
+      this.setButtonsVisible(scrollController.position.userScrollDirection ==
+          ScrollDirection.forward);
     }
+  }
 
   Widget buildBody(List<Verse> verseList, int verse) {
     final ItemPositionsListener itemPositionsListener =
         ItemPositionsListener.create();
     itemPositionsListener.itemPositions.addListener(
         () => updatePositions(itemPositionsListener.itemPositions.value));
-    print(verse);
-    try {itemScrollController.jumpTo(index: verse - 1, alignment: alignment);} catch (_) {} //when page is reloaded
-    return ScrollablePositionedList.builder(
+    scrollController.addListener(this.buttonVisibilityListener);
+    ScrollablePositionedList result = ScrollablePositionedList.builder(
       itemScrollController: itemScrollController,
       itemPositionsListener: itemPositionsListener,
+      scrollController: scrollController,
       itemCount: verseList.length + 1,
       itemBuilder: (context, index) {
         return versesToWidget(verseList, context)[index];
@@ -214,6 +223,7 @@ class _BiblePageState extends State<BiblePage> {
       initialScrollIndex: verse - 1,
       initialAlignment: alignment,
     );
+    return result;
   }
 
   Widget buildButtons() {
@@ -286,7 +296,6 @@ class _BiblePageState extends State<BiblePage> {
   @override
   void dispose() async {
     super.dispose();
-    print("dispose called");
     SharedPreferences preferences = await SharedPreferences.getInstance();
     preferences.setString(
         "book", await displayPassage.then((passage) => passage.book));
